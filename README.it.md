@@ -1,17 +1,9 @@
-<p align="center">
-  <a href="https://openchat.ai">
-    <picture>
-      <source srcset="packages/console/app/src/asset/logo-ornate-dark.svg" media="(prefers-color-scheme: dark)">
-      <source srcset="packages/console/app/src/asset/logo-ornate-light.svg" media="(prefers-color-scheme: light)">
-      <img src="packages/console/app/src/asset/logo-ornate-light.svg" alt="Logo OpenCode">
-    </picture>
-  </a>
-</p>
-<p align="center">L’agente di coding AI open source.</p>
+[![OpenChat Terminal UI](packages/web/src/assets/lander/screenshot.png)](https://openchat.ai)
+
 <p align="center">
   <a href="https://openchat.ai/discord"><img alt="Discord" src="https://img.shields.io/discord/1391832426048651334?style=flat-square&label=discord" /></a>
   <a href="https://www.npmjs.com/package/openchat-ai"><img alt="npm" src="https://img.shields.io/npm/v/openchat-ai?style=flat-square" /></a>
-  <a href="https://github.com/anomalyco/openchat/actions/workflows/publish.yml"><img alt="Build status" src="https://img.shields.io/github/actions/workflow/status/anomalyco/openchat/publish.yml?style=flat-square&branch=dev" /></a>
+  <a href="https://github.com/dzshowrav/openchat/actions/workflows/publish.yml"><img alt="Build status" src="https://img.shields.io/github/actions/workflow/status/dzshowrav/openchat/publish.yml?style=flat-square&branch=dev" /></a>
 </p>
 
 <p align="center">
@@ -39,8 +31,6 @@
   <a href="README.vi.md">Tiếng Việt</a>
 </p>
 
-[![OpenCode Terminal UI](packages/web/src/assets/lander/screenshot.png)](https://openchat.ai)
-
 ---
 
 ### Installazione
@@ -53,12 +43,12 @@ curl -fsSL https://openchat.ai/install | bash
 npm i -g openchat-ai@latest        # oppure bun/pnpm/yarn
 scoop install openchat             # Windows
 choco install openchat             # Windows
-brew install anomalyco/tap/openchat # macOS e Linux (consigliato, sempre aggiornato)
+brew install dzshowrav/tap/openchat # macOS e Linux (consigliato, sempre aggiornato)
 brew install openchat              # macOS e Linux (formula brew ufficiale, aggiornata meno spesso)
 sudo pacman -S openchat            # Arch Linux (Stable)
 paru -S openchat-bin               # Arch Linux (Latest from AUR)
 mise use -g openchat               # Qualsiasi OS
-nix run nixpkgs#openchat           # oppure github:anomalyco/openchat per l’ultima branch di sviluppo
+nix run nixpkgs#openchat           # oppure github:dzshowrav/openchat per l’ultima branch di sviluppo
 ```
 
 > [!TIP]
@@ -66,7 +56,7 @@ nix run nixpkgs#openchat           # oppure github:anomalyco/openchat per l’ul
 
 ### App Desktop (BETA)
 
-OpenCode è disponibile anche come applicazione desktop. Puoi scaricarla direttamente dalla [pagina delle release](https://github.com/anomalyco/openchat/releases) oppure da [openchat.ai/download](https://openchat.ai/download).
+OpenChat è disponibile anche come applicazione desktop. Puoi scaricarla direttamente dalla [pagina delle release](https://github.com/dzshowrav/openchat/releases) oppure da [openchat.ai/download](https://openchat.ai/download).
 
 | Piattaforma           | Download                           |
 | --------------------- | ---------------------------------- |
@@ -99,7 +89,7 @@ XDG_BIN_DIR=$HOME/.local/bin curl -fsSL https://openchat.ai/install | bash
 
 ### Agenti
 
-OpenCode include due agenti integrati tra cui puoi passare usando il tasto `Tab`.
+OpenChat include due agenti integrati tra cui puoi passare usando il tasto `Tab`.
 
 - **build** – Predefinito, agente con accesso completo per il lavoro di sviluppo
 - **plan** – Agente in sola lettura per analisi ed esplorazione del codice
@@ -114,15 +104,15 @@ Scopri di più sugli [agenti](https://openchat.ai/docs/agents).
 
 ### Documentazione
 
-Per maggiori informazioni su come configurare OpenCode, [**consulta la nostra documentazione**](https://openchat.ai/docs).
+Per maggiori informazioni su come configurare OpenChat, [**consulta la nostra documentazione**](https://openchat.ai/docs).
 
 ### Contribuire
 
-Se sei interessato a contribuire a OpenCode, leggi la nostra [guida alla contribuzione](./CONTRIBUTING.md) prima di inviare una pull request.
+Se sei interessato a contribuire a OpenChat, leggi la nostra [guida alla contribuzione](./CONTRIBUTING.md) prima di inviare una pull request.
 
-### Costruire su OpenCode
+### Costruire su OpenChat
 
-Se stai lavorando a un progetto correlato a OpenCode e che utilizza “openchat” come parte del nome (ad esempio “openchat-dashboard” o “openchat-mobile”), aggiungi una nota nel tuo README per chiarire che non è sviluppato dal team OpenCode e che non è affiliato in alcun modo con noi.
+Se stai lavorando a un progetto correlato a OpenChat e che utilizza “openchat” come parte del nome (ad esempio “openchat-dashboard” o “openchat-mobile”), aggiungi una nota nel tuo README per chiarire che non è sviluppato dal team OpenChat e che non è affiliato in alcun modo con noi.
 
 ---
 

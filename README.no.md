@@ -1,17 +1,9 @@
-<p align="center">
-  <a href="https://openchat.ai">
-    <picture>
-      <source srcset="packages/console/app/src/asset/logo-ornate-dark.svg" media="(prefers-color-scheme: dark)">
-      <source srcset="packages/console/app/src/asset/logo-ornate-light.svg" media="(prefers-color-scheme: light)">
-      <img src="packages/console/app/src/asset/logo-ornate-light.svg" alt="OpenCode logo">
-    </picture>
-  </a>
-</p>
-<p align="center">AI-kodeagent med åpen kildekode.</p>
+[![OpenChat Terminal UI](packages/web/src/assets/lander/screenshot.png)](https://openchat.ai)
+
 <p align="center">
   <a href="https://openchat.ai/discord"><img alt="Discord" src="https://img.shields.io/discord/1391832426048651334?style=flat-square&label=discord" /></a>
   <a href="https://www.npmjs.com/package/openchat-ai"><img alt="npm" src="https://img.shields.io/npm/v/openchat-ai?style=flat-square" /></a>
-  <a href="https://github.com/anomalyco/openchat/actions/workflows/publish.yml"><img alt="Build status" src="https://img.shields.io/github/actions/workflow/status/anomalyco/openchat/publish.yml?style=flat-square&branch=dev" /></a>
+  <a href="https://github.com/dzshowrav/openchat/actions/workflows/publish.yml"><img alt="Build status" src="https://img.shields.io/github/actions/workflow/status/dzshowrav/openchat/publish.yml?style=flat-square&branch=dev" /></a>
 </p>
 
 <p align="center">
@@ -39,8 +31,6 @@
   <a href="README.vi.md">Tiếng Việt</a>
 </p>
 
-[![OpenCode Terminal UI](packages/web/src/assets/lander/screenshot.png)](https://openchat.ai)
-
 ---
 
 ### Installasjon
@@ -53,12 +43,12 @@ curl -fsSL https://openchat.ai/install | bash
 npm i -g openchat-ai@latest        # eller bun/pnpm/yarn
 scoop install openchat             # Windows
 choco install openchat             # Windows
-brew install anomalyco/tap/openchat # macOS og Linux (anbefalt, alltid oppdatert)
+brew install dzshowrav/tap/openchat # macOS og Linux (anbefalt, alltid oppdatert)
 brew install openchat              # macOS og Linux (offisiell brew-formel, oppdateres sjeldnere)
 sudo pacman -S openchat            # Arch Linux (Stable)
 paru -S openchat-bin               # Arch Linux (Latest from AUR)
 mise use -g openchat               # alle OS
-nix run nixpkgs#openchat           # eller github:anomalyco/openchat for nyeste dev-branch
+nix run nixpkgs#openchat           # eller github:dzshowrav/openchat for nyeste dev-branch
 ```
 
 > [!TIP]
@@ -66,7 +56,7 @@ nix run nixpkgs#openchat           # eller github:anomalyco/openchat for nyeste 
 
 ### Desktop-app (BETA)
 
-OpenCode er også tilgjengelig som en desktop-app. Last ned direkte fra [releases-siden](https://github.com/anomalyco/openchat/releases) eller [openchat.ai/download](https://openchat.ai/download).
+OpenChat er også tilgjengelig som en desktop-app. Last ned direkte fra [releases-siden](https://github.com/dzshowrav/openchat/releases) eller [openchat.ai/download](https://openchat.ai/download).
 
 | Plattform             | Nedlasting                         |
 | --------------------- | ---------------------------------- |
@@ -99,7 +89,7 @@ XDG_BIN_DIR=$HOME/.local/bin curl -fsSL https://openchat.ai/install | bash
 
 ### Agents
 
-OpenCode har to innebygde agents du kan bytte mellom med `Tab`-tasten.
+OpenChat har to innebygde agents du kan bytte mellom med `Tab`-tasten.
 
 - **build** - Standard, agent med full tilgang for utviklingsarbeid
 - **plan** - Skrivebeskyttet agent for analyse og kodeutforsking
@@ -114,15 +104,15 @@ Les mer om [agents](https://openchat.ai/docs/agents).
 
 ### Dokumentasjon
 
-For mer info om hvordan du konfigurerer OpenCode, [**se dokumentasjonen**](https://openchat.ai/docs).
+For mer info om hvordan du konfigurerer OpenChat, [**se dokumentasjonen**](https://openchat.ai/docs).
 
 ### Bidra
 
-Hvis du vil bidra til OpenCode, les [contributing docs](./CONTRIBUTING.md) før du sender en pull request.
+Hvis du vil bidra til OpenChat, les [contributing docs](./CONTRIBUTING.md) før du sender en pull request.
 
-### Bygge på OpenCode
+### Bygge på OpenChat
 
-Hvis du jobber med et prosjekt som er relatert til OpenCode og bruker "openchat" som en del av navnet; for eksempel "openchat-dashboard" eller "openchat-mobile", legg inn en merknad i README som presiserer at det ikke er bygget av OpenCode-teamet og ikke er tilknyttet oss på noen måte.
+Hvis du jobber med et prosjekt som er relatert til OpenChat og bruker "openchat" som en del av navnet; for eksempel "openchat-dashboard" eller "openchat-mobile", legg inn en merknad i README som presiserer at det ikke er bygget av OpenChat-teamet og ikke er tilknyttet oss på noen måte.
 
 ---
 
