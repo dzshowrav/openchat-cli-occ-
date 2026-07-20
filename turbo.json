@@ -1,0 +1,33 @@
+{
+  "$schema": "https://v2-8-13.turborepo.dev/schema.json",
+  "globalEnv": ["CI", "OPENCHAT_DISABLE_SHARE"],
+  "globalPassThroughEnv": ["CI", "OPENCHAT_DISABLE_SHARE"],
+  "tasks": {
+    "typecheck": {},
+    "build": {
+      "dependsOn": [],
+      "outputs": ["dist/**"]
+    },
+    "openchat#test": {
+      "dependsOn": ["^build"],
+      "outputs": [],
+      "passThroughEnv": ["*"]
+    },
+    "@openchat-ai/core#test": {
+      "dependsOn": ["^build"],
+      "outputs": []
+    },
+    "@openchat-ai/app#test": {
+      "dependsOn": ["^build"],
+      "outputs": []
+    },
+    "@openchat-ai/ui#test": {
+      "dependsOn": ["^build"],
+      "outputs": []
+    },
+    "@openchat-ai/session-ui#test": {
+      "dependsOn": ["^build"],
+      "outputs": []
+    }
+  }
+}

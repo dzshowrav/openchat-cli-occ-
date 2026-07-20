@@ -1,0 +1,733 @@
+---
+title: CLI
+description: OpenCode CLI options and commands.
+---
+
+import { Tabs, TabItem } from "@astrojs/starlight/components"
+
+The OpenCode CLI by default starts the [TUI](/docs/tui) when run without any arguments.
+
+```bash
+openchat
+```
+
+But it also accepts commands as documented on this page. This allows you to interact with OpenCode programmatically.
+
+```bash
+openchat run "Explain how closures work in JavaScript"
+```
+
+---
+
+### tui
+
+Start the OpenCode terminal user interface.
+
+```bash
+openchat [project]
+```
+
+#### Flags
+
+| Flag                                        | Short | Description                                                             |
+| ------------------------------------------- | ----- | ----------------------------------------------------------------------- |
+| <nobr><code>{"--continue"}</code></nobr>    | `-c`  | Continue the last session                                               |
+| <nobr><code>{"--session"}</code></nobr>     | `-s`  | Session ID to continue                                                  |
+| <nobr><code>{"--fork"}</code></nobr>        |       | Fork the session when continuing (use with `--continue` or `--session`) |
+| <nobr><code>{"--prompt"}</code></nobr>      |       | Prompt to use                                                           |
+| <nobr><code>{"--model"}</code></nobr>       | `-m`  | Model to use in the form of provider/model                              |
+| <nobr><code>{"--agent"}</code></nobr>       |       | Agent to use                                                            |
+| <nobr><code>{"--auto"}</code></nobr>        |       | Auto-approve permissions that are not explicitly denied                 |
+| <nobr><code>{"--port"}</code></nobr>        |       | Port to listen on                                                       |
+| <nobr><code>{"--hostname"}</code></nobr>    |       | Hostname to listen on                                                   |
+| <nobr><code>{"--mdns"}</code></nobr>        |       | Enable mDNS discovery                                                   |
+| <nobr><code>{"--mdns-domain"}</code></nobr> |       | Custom mDNS domain name                                                 |
+| <nobr><code>{"--cors"}</code></nobr>        |       | Additional browser origin(s) to allow CORS                              |
+
+---
+
+## Commands
+
+The OpenCode CLI also has the following commands.
+
+---
+
+### agent
+
+Manage agents for OpenCode.
+
+```bash
+openchat agent [command]
+```
+
+---
+
+#### create
+
+Create a new agent with custom configuration.
+
+```bash
+openchat agent create
+```
+
+This command will guide you through creating a new agent with a custom system prompt and permission configuration. Anything you don't allow is denied in the generated agent's frontmatter.
+
+#### Flags
+
+| Flag                                        | Short | Description                                                                                                                                                                                                                |
+| ------------------------------------------- | ----- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| <nobr><code>{"--path"}</code></nobr>        |       | Directory to write the agent file to (defaults to global or `.openchat/agent` based on the prompt)                                                                                                                         |
+| <nobr><code>{"--description"}</code></nobr> |       | What the agent should do                                                                                                                                                                                                   |
+| <nobr><code>{"--mode"}</code></nobr>        |       | Agent mode: `all`, `primary`, or `subagent`                                                                                                                                                                                |
+| <nobr><code>{"--permissions"}</code></nobr> |       | Comma-separated list of permissions to allow (default: all). Available: `bash`, `read`, `edit`, `glob`, `grep`, `webfetch`, `task`, `todowrite`, `websearch`, `lsp`, `skill`. Anything omitted is denied. Alias: `--tools` |
+| <nobr><code>{"--model"}</code></nobr>       | `-m`  | Model to use, in `provider/model` format                                                                                                                                                                                   |
+
+Passing all of `--path`, `--description`, `--mode`, and `--permissions` runs the command non-interactively.
+
+---
+
+#### list
+
+List all available agents.
+
+```bash
+openchat agent list
+```
+
+---
+
+### attach
+
+Attach a terminal to an already running OpenCode backend server started via `serve` or `web` commands.
+
+```bash
+openchat attach [url]
+```
+
+This allows using the TUI with a remote OpenCode backend. For example:
+
+```bash
+# Start the backend server for web/mobile access
+openchat web --port 4096 --hostname 0.0.0.0
+
+# In another terminal, attach the TUI to the running backend
+openchat attach http://10.20.30.40:4096
+```
+
+#### Flags
+
+| Flag                                     | Short | Description                                                                |
+| ---------------------------------------- | ----- | -------------------------------------------------------------------------- |
+| <nobr><code>{"--dir"}</code></nobr>      |       | Working directory to start TUI in                                          |
+| <nobr><code>{"--continue"}</code></nobr> | `-c`  | Continue the last session                                                  |
+| <nobr><code>{"--session"}</code></nobr>  | `-s`  | Session ID to continue                                                     |
+| <nobr><code>{"--fork"}</code></nobr>     |       | Fork the session when continuing (use with `--continue` or `--session`)    |
+| <nobr><code>{"--password"}</code></nobr> | `-p`  | Basic auth password (defaults to `OPENCHAT_SERVER_PASSWORD`)               |
+| <nobr><code>{"--username"}</code></nobr> | `-u`  | Basic auth username (defaults to `OPENCHAT_SERVER_USERNAME` or `openchat`) |
+
+---
+
+### auth
+
+Command to manage credentials and login for providers.
+
+```bash
+openchat auth [command]
+```
+
+---
+
+#### login
+
+OpenCode is powered by the provider list at [Models.dev](https://models.dev), so you can use `openchat auth login` to configure API keys for any provider you'd like to use. This is stored in `~/.local/share/openchat/auth.json`.
+
+```bash
+openchat auth login
+```
+
+When OpenCode starts up it loads the providers from the credentials file. And if there are any keys defined in your environments or a `.env` file in your project.
+
+##### Flags
+
+| Flag                                     | Short | Description                                          |
+| ---------------------------------------- | ----- | ---------------------------------------------------- |
+| <nobr><code>{"--provider"}</code></nobr> | `-p`  | Provider ID or name to log in to                     |
+| <nobr><code>{"--method"}</code></nobr>   | `-m`  | Login method label to use, skipping method selection |
+
+---
+
+#### list
+
+Lists all the authenticated providers as stored in the credentials file.
+
+```bash
+openchat auth list
+```
+
+Or the short version.
+
+```bash
+openchat auth ls
+```
+
+---
+
+#### logout
+
+Logs you out of a provider by clearing it from the credentials file.
+
+```bash
+openchat auth logout
+```
+
+---
+
+### github
+
+Manage the GitHub agent for repository automation.
+
+```bash
+openchat github [command]
+```
+
+---
+
+#### install
+
+Install the GitHub agent in your repository.
+
+```bash
+openchat github install
+```
+
+This sets up the necessary GitHub Actions workflow and guides you through the configuration process. [Learn more](/docs/github).
+
+---
+
+#### run
+
+Run the GitHub agent. This is typically used in GitHub Actions.
+
+```bash
+openchat github run
+```
+
+##### Flags
+
+| Flag                                  | Description                            |
+| ------------------------------------- | -------------------------------------- |
+| <nobr><code>{"--event"}</code></nobr> | GitHub mock event to run the agent for |
+| <nobr><code>{"--token"}</code></nobr> | GitHub personal access token           |
+
+---
+
+### mcp
+
+Manage Model Context Protocol servers.
+
+```bash
+openchat mcp [command]
+```
+
+---
+
+#### add
+
+Add an MCP server to your configuration.
+
+```bash
+openchat mcp add
+```
+
+This command will guide you through adding either a local or remote MCP server.
+
+---
+
+#### list
+
+List all configured MCP servers and their connection status.
+
+```bash
+openchat mcp list
+```
+
+Or use the short version.
+
+```bash
+openchat mcp ls
+```
+
+---
+
+#### auth
+
+Authenticate with an OAuth-enabled MCP server.
+
+```bash
+openchat mcp auth [name]
+```
+
+If you don't provide a server name, you'll be prompted to select from available OAuth-capable servers.
+
+You can also list OAuth-capable servers and their authentication status.
+
+```bash
+openchat mcp auth list
+```
+
+Or use the short version.
+
+```bash
+openchat mcp auth ls
+```
+
+---
+
+#### logout
+
+Remove OAuth credentials for an MCP server.
+
+```bash
+openchat mcp logout [name]
+```
+
+---
+
+#### debug
+
+Debug OAuth connection issues for an MCP server.
+
+```bash
+openchat mcp debug <name>
+```
+
+---
+
+### models
+
+List all available models from configured providers.
+
+```bash
+openchat models [provider]
+```
+
+This command displays all models available across your configured providers in the format `provider/model`.
+
+This is useful for figuring out the exact model name to use in [your config](/docs/config/).
+
+You can optionally pass a provider ID to filter models by that provider.
+
+```bash
+openchat models anthropic
+```
+
+#### Flags
+
+| Flag                                    | Description                                                  |
+| --------------------------------------- | ------------------------------------------------------------ |
+| <nobr><code>{"--refresh"}</code></nobr> | Refresh the models cache from models.dev                     |
+| <nobr><code>{"--verbose"}</code></nobr> | Use more verbose model output (includes metadata like costs) |
+
+Use the `--refresh` flag to update the cached model list. This is useful when new models have been added to a provider and you want to see them in OpenCode.
+
+```bash
+openchat models --refresh
+```
+
+---
+
+### run
+
+Run openchat in non-interactive mode by passing a prompt directly.
+
+```bash
+openchat run [message..]
+```
+
+This is useful for scripting, automation, or when you want a quick answer without launching the full TUI. For example.
+
+```bash "openchat run"
+openchat run Explain the use of context in Go
+```
+
+You can also attach to a running `openchat serve` instance to avoid MCP server cold boot times on every run:
+
+```bash
+# Start a headless server in one terminal
+openchat serve
+
+# In another terminal, run commands that attach to it
+openchat run --attach http://localhost:4096 "Explain async/await in JavaScript"
+```
+
+#### Flags
+
+| Flag                                     | Short | Description                                                                |
+| ---------------------------------------- | ----- | -------------------------------------------------------------------------- |
+| <nobr><code>{"--command"}</code></nobr>  |       | The command to run, use message for args                                   |
+| <nobr><code>{"--continue"}</code></nobr> | `-c`  | Continue the last session                                                  |
+| <nobr><code>{"--session"}</code></nobr>  | `-s`  | Session ID to continue                                                     |
+| <nobr><code>{"--fork"}</code></nobr>     |       | Fork the session when continuing (use with `--continue` or `--session`)    |
+| <nobr><code>{"--share"}</code></nobr>    |       | Share the session                                                          |
+| <nobr><code>{"--model"}</code></nobr>    | `-m`  | Model to use in the form of provider/model                                 |
+| <nobr><code>{"--agent"}</code></nobr>    |       | Agent to use                                                               |
+| <nobr><code>{"--file"}</code></nobr>     | `-f`  | File(s) to attach to message                                               |
+| <nobr><code>{"--format"}</code></nobr>   |       | Format: default (formatted) or json (raw JSON events)                      |
+| <nobr><code>{"--title"}</code></nobr>    |       | Title for the session (uses truncated prompt if no value provided)         |
+| <nobr><code>{"--attach"}</code></nobr>   |       | Attach to a running openchat server (e.g., http://localhost:4096)          |
+| <nobr><code>{"--password"}</code></nobr> | `-p`  | Basic auth password (defaults to `OPENCHAT_SERVER_PASSWORD`)               |
+| <nobr><code>{"--username"}</code></nobr> | `-u`  | Basic auth username (defaults to `OPENCHAT_SERVER_USERNAME` or `openchat`) |
+| <nobr><code>{"--dir"}</code></nobr>      |       | Directory to run in, or path on the remote server when attaching           |
+| <nobr><code>{"--port"}</code></nobr>     |       | Port for the local server (defaults to random port)                        |
+| <nobr><code>{"--variant"}</code></nobr>  |       | Model variant (provider-specific reasoning effort)                         |
+| <nobr><code>{"--thinking"}</code></nobr> |       | Show thinking blocks                                                       |
+| <nobr><code>{"--auto"}</code></nobr>     |       | Auto-approve permissions that are not explicitly denied                    |
+
+---
+
+### serve
+
+Start a headless OpenCode server for API access. Check out the [server docs](/docs/server) for the full HTTP interface.
+
+```bash
+openchat serve
+```
+
+This starts an HTTP server that provides API access to openchat functionality without the TUI interface. Set `OPENCHAT_SERVER_PASSWORD` to enable HTTP basic auth (username defaults to `openchat`).
+
+#### Flags
+
+| Flag                                        | Description                                |
+| ------------------------------------------- | ------------------------------------------ |
+| <nobr><code>{"--port"}</code></nobr>        | Port to listen on                          |
+| <nobr><code>{"--hostname"}</code></nobr>    | Hostname to listen on                      |
+| <nobr><code>{"--mdns"}</code></nobr>        | Enable mDNS discovery                      |
+| <nobr><code>{"--mdns-domain"}</code></nobr> | Custom mDNS domain name                    |
+| <nobr><code>{"--cors"}</code></nobr>        | Additional browser origin(s) to allow CORS |
+
+---
+
+### session
+
+Manage OpenCode sessions.
+
+```bash
+openchat session [command]
+```
+
+---
+
+#### list
+
+List all OpenCode sessions.
+
+```bash
+openchat session list
+```
+
+##### Flags
+
+| Flag                                      | Short | Description                          |
+| ----------------------------------------- | ----- | ------------------------------------ |
+| <nobr><code>{"--max-count"}</code></nobr> | `-n`  | Limit to N most recent sessions      |
+| <nobr><code>{"--format"}</code></nobr>    |       | Output format: table or json (table) |
+
+---
+
+#### delete
+
+Delete an OpenCode session.
+
+```bash
+openchat session delete <sessionID>
+```
+
+---
+
+### stats
+
+Show token usage and cost statistics for your OpenCode sessions.
+
+```bash
+openchat stats
+```
+
+#### Flags
+
+| Flag                                    | Description                                                                 |
+| --------------------------------------- | --------------------------------------------------------------------------- |
+| <nobr><code>{"--days"}</code></nobr>    | Show stats for the last N days (all time)                                   |
+| <nobr><code>{"--tools"}</code></nobr>   | Number of tools to show (all)                                               |
+| <nobr><code>{"--models"}</code></nobr>  | Show model usage breakdown (hidden by default). Pass a number to show top N |
+| <nobr><code>{"--project"}</code></nobr> | Filter by project (all projects, empty string: current project)             |
+
+---
+
+### export
+
+Export session data as JSON.
+
+```bash
+openchat export [sessionID]
+```
+
+If you don't provide a session ID, you'll be prompted to select from available sessions.
+
+#### Flags
+
+| Flag                                     | Description                           |
+| ---------------------------------------- | ------------------------------------- |
+| <nobr><code>{"--sanitize"}</code></nobr> | Redact sensitive transcript/file data |
+
+---
+
+### import
+
+Import session data from a JSON file or OpenCode share URL.
+
+```bash
+openchat import <file>
+```
+
+You can import from a local file or an OpenCode share URL.
+
+```bash
+openchat import session.json
+openchat import https://opncd.ai/s/abc123
+```
+
+---
+
+### web
+
+Start a headless OpenCode server with a web interface.
+
+```bash
+openchat web
+```
+
+This starts an HTTP server and opens a web browser to access OpenCode through a web interface. Set `OPENCHAT_SERVER_PASSWORD` to enable HTTP basic auth (username defaults to `openchat`).
+
+#### Flags
+
+| Flag                                        | Description                                |
+| ------------------------------------------- | ------------------------------------------ |
+| <nobr><code>{"--port"}</code></nobr>        | Port to listen on                          |
+| <nobr><code>{"--hostname"}</code></nobr>    | Hostname to listen on                      |
+| <nobr><code>{"--mdns"}</code></nobr>        | Enable mDNS discovery                      |
+| <nobr><code>{"--mdns-domain"}</code></nobr> | Custom mDNS domain name                    |
+| <nobr><code>{"--cors"}</code></nobr>        | Additional browser origin(s) to allow CORS |
+
+---
+
+### acp
+
+Start an ACP (Agent Client Protocol) server.
+
+```bash
+openchat acp
+```
+
+This command starts an ACP server that communicates via stdin/stdout using nd-JSON.
+
+#### Flags
+
+| Flag                                        | Description                                |
+| ------------------------------------------- | ------------------------------------------ |
+| <nobr><code>{"--cwd"}</code></nobr>         | Working directory                          |
+| <nobr><code>{"--port"}</code></nobr>        | Port to listen on                          |
+| <nobr><code>{"--hostname"}</code></nobr>    | Hostname to listen on                      |
+| <nobr><code>{"--mdns"}</code></nobr>        | Enable mDNS discovery                      |
+| <nobr><code>{"--mdns-domain"}</code></nobr> | Custom mDNS domain name                    |
+| <nobr><code>{"--cors"}</code></nobr>        | Additional browser origin(s) to allow CORS |
+
+---
+
+### plugin
+
+Install a plugin and update your config.
+
+```bash
+openchat plugin <module>
+```
+
+Or use the alias.
+
+```bash
+openchat plug <module>
+```
+
+#### Flags
+
+| Flag                                   | Short | Description                     |
+| -------------------------------------- | ----- | ------------------------------- |
+| <nobr><code>{"--global"}</code></nobr> | `-g`  | Install in global config        |
+| <nobr><code>{"--force"}</code></nobr>  | `-f`  | Replace existing plugin version |
+
+---
+
+### pr
+
+Fetch and checkout a GitHub PR branch, then run OpenCode.
+
+```bash
+openchat pr <number>
+```
+
+---
+
+### db
+
+Database tools.
+
+```bash
+openchat db [query]
+```
+
+#### Flags
+
+| Flag                                   | Description                    |
+| -------------------------------------- | ------------------------------ |
+| <nobr><code>{"--format"}</code></nobr> | Output format: `json` or `tsv` |
+
+---
+
+#### path
+
+Print the database path.
+
+```bash
+openchat db path
+```
+
+---
+
+### debug
+
+Debugging and troubleshooting tools.
+
+```bash
+openchat debug [command]
+```
+
+---
+
+### uninstall
+
+Uninstall OpenCode and remove all related files.
+
+```bash
+openchat uninstall
+```
+
+#### Flags
+
+| Flag                                        | Short | Description                                 |
+| ------------------------------------------- | ----- | ------------------------------------------- |
+| <nobr><code>{"--keep-config"}</code></nobr> | `-c`  | Keep configuration files                    |
+| <nobr><code>{"--keep-data"}</code></nobr>   | `-d`  | Keep session data and snapshots             |
+| <nobr><code>{"--dry-run"}</code></nobr>     |       | Show what would be removed without removing |
+| <nobr><code>{"--force"}</code></nobr>       | `-f`  | Skip confirmation prompts                   |
+
+---
+
+### upgrade
+
+Updates openchat to the latest version or a specific version.
+
+```bash
+openchat upgrade [target]
+```
+
+To upgrade to the latest version.
+
+```bash
+openchat upgrade
+```
+
+To upgrade to a specific version.
+
+```bash
+openchat upgrade v0.1.48
+```
+
+#### Flags
+
+| Flag                                   | Short | Description                                                       |
+| -------------------------------------- | ----- | ----------------------------------------------------------------- |
+| <nobr><code>{"--method"}</code></nobr> | `-m`  | The installation method that was used; curl, npm, pnpm, bun, brew |
+
+---
+
+## Global Flags
+
+The openchat CLI takes the following global flags.
+
+| Flag                                       | Short | Description                          |
+| ------------------------------------------ | ----- | ------------------------------------ |
+| <nobr><code>{"--help"}</code></nobr>       | `-h`  | Display help                         |
+| <nobr><code>{"--version"}</code></nobr>    | `-v`  | Print version number                 |
+| <nobr><code>{"--print-logs"}</code></nobr> |       | Print logs to stderr                 |
+| <nobr><code>{"--log-level"}</code></nobr>  |       | Log level (DEBUG, INFO, WARN, ERROR) |
+| <nobr><code>{"--pure"}</code></nobr>       |       | Run without external plugins         |
+
+---
+
+## Environment variables
+
+OpenCode can be configured using environment variables.
+
+| Variable                              | Type    | Description                                       |
+| ------------------------------------- | ------- | ------------------------------------------------- |
+| `OPENCHAT_AUTO_SHARE`                 | boolean | Automatically share sessions                      |
+| `OPENCHAT_GIT_BASH_PATH`              | string  | Path to Git Bash executable on Windows            |
+| `OPENCHAT_CONFIG`                     | string  | Path to config file                               |
+| `OPENCHAT_TUI_CONFIG`                 | string  | Path to TUI config file                           |
+| `OPENCHAT_CONFIG_DIR`                 | string  | Path to config directory                          |
+| `OPENCHAT_CONFIG_CONTENT`             | string  | Inline json config content                        |
+| `OPENCHAT_DISABLE_AUTOUPDATE`         | boolean | Disable automatic update checks                   |
+| `OPENCHAT_DISABLE_PRUNE`              | boolean | Disable pruning of old data                       |
+| `OPENCHAT_DISABLE_TERMINAL_TITLE`     | boolean | Disable automatic terminal title updates          |
+| `OPENCHAT_PERMISSION`                 | string  | Inlined json permissions config                   |
+| `OPENCHAT_DISABLE_DEFAULT_PLUGINS`    | boolean | Disable default plugins                           |
+| `OPENCHAT_DISABLE_LSP_DOWNLOAD`       | boolean | Disable automatic LSP server downloads            |
+| `OPENCHAT_ENABLE_EXPERIMENTAL_MODELS` | boolean | Enable experimental models                        |
+| `OPENCHAT_DISABLE_AUTOCOMPACT`        | boolean | Disable automatic context compaction              |
+| `OPENCHAT_DISABLE_CLAUDE_CODE`        | boolean | Disable reading from `.claude` (prompt + skills)  |
+| `OPENCHAT_DISABLE_CLAUDE_CODE_PROMPT` | boolean | Disable reading `~/.claude/CLAUDE.md`             |
+| `OPENCHAT_DISABLE_CLAUDE_CODE_SKILLS` | boolean | Disable loading `.claude/skills`                  |
+| `OPENCHAT_DISABLE_MODELS_FETCH`       | boolean | Disable fetching models from remote sources       |
+| `OPENCHAT_DISABLE_MOUSE`              | boolean | Disable mouse capture in the TUI                  |
+| `OPENCHAT_FAKE_VCS`                   | string  | Fake VCS provider for testing purposes            |
+| `OPENCHAT_CLIENT`                     | string  | Client identifier (defaults to `cli`)             |
+| `OPENCHAT_ENABLE_EXA`                 | boolean | Enable Exa web search tools                       |
+| `OPENCHAT_SERVER_PASSWORD`            | string  | Enable basic auth for `serve`/`web`               |
+| `OPENCHAT_SERVER_USERNAME`            | string  | Override basic auth username (default `openchat`) |
+| `OPENCHAT_MODELS_URL`                 | string  | Custom URL for fetching models configuration      |
+
+---
+
+### Experimental
+
+These environment variables enable experimental features that may change or be removed.
+
+| Variable                                        | Type    | Description                             |
+| ----------------------------------------------- | ------- | --------------------------------------- |
+| `OPENCHAT_EXPERIMENTAL`                         | boolean | Enable the experimental umbrella flag   |
+| `OPENCHAT_EXPERIMENTAL_ICON_DISCOVERY`          | boolean | Enable icon discovery                   |
+| `OPENCHAT_EXPERIMENTAL_DISABLE_COPY_ON_SELECT`  | boolean | Disable copy on select in TUI           |
+| `OPENCHAT_EXPERIMENTAL_BASH_DEFAULT_TIMEOUT_MS` | number  | Default timeout for bash commands in ms |
+| `OPENCHAT_EXPERIMENTAL_OUTPUT_TOKEN_MAX`        | number  | Max output tokens for LLM responses     |
+| `OPENCHAT_EXPERIMENTAL_FILEWATCHER`             | boolean | Enable file watcher for entire dir      |
+| `OPENCHAT_EXPERIMENTAL_OXFMT`                   | boolean | Enable oxfmt formatter                  |
+| `OPENCHAT_EXPERIMENTAL_LSP_TOOL`                | boolean | Enable experimental LSP tool            |
+| `OPENCHAT_EXPERIMENTAL_DISABLE_FILEWATCHER`     | boolean | Disable file watcher                    |
+| `OPENCHAT_EXPERIMENTAL_EXA`                     | boolean | Enable experimental Exa features        |
+| `OPENCHAT_EXPERIMENTAL_LSP_TY`                  | boolean | Enable TY LSP for python files          |
+| `OPENCHAT_EXPERIMENTAL_PLAN_MODE`               | boolean | Enable plan mode                        |
+| `OPENCHAT_EXPERIMENTAL_BACKGROUND_SUBAGENTS`    | boolean | Enable background subagent tasks        |
+| `OPENCHAT_EXPERIMENTAL_EVENT_SYSTEM`            | boolean | Enable experimental event system        |
+| `OPENCHAT_EXPERIMENTAL_NATIVE_LLM`              | boolean | Enable native LLM request path          |
+| `OPENCHAT_EXPERIMENTAL_PARALLEL`                | boolean | Enable parallel web search execution    |
+| `OPENCHAT_EXPERIMENTAL_SCOUT`                   | boolean | Enable Scout subagent                   |
+| `OPENCHAT_EXPERIMENTAL_WORKSPACES`              | boolean | Enable workspace support                |
