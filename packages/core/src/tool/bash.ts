@@ -1,6 +1,7 @@
 export * as BashTool from "./bash"
 
 import path from "path"
+import { which } from "../util/which"
 import { ToolFailure } from "@openchat-ai/llm"
 import { Duration, Effect, Layer, Schema } from "effect"
 import { ChildProcess } from "effect/unstable/process"
@@ -46,7 +47,10 @@ const Output = Schema.Struct({
 
 type Output = typeof Output.Type
 
-const defaultShell = () => (process.platform === "win32" ? (process.env.COMSPEC ?? "cmd.exe") : "/bin/sh")
+const defaultShell = () => {
+  if (process.platform === "win32") return process.env.COMSPEC ?? "cmd.exe"
+  return which("sh") ?? which("bash") ?? "/bin/sh"
+}
 
 const modelOutput = (output: Output) => {
   const warnings = output.warnings?.length

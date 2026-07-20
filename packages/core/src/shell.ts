@@ -108,6 +108,8 @@ function win() {
 async function unix() {
   const text = await readFile("/etc/shells", "utf8").catch(() => "")
   if (text) return Array.from(new Set(text.split("\n").filter((line) => line.trim() && !line.startsWith("#"))))
+  const shells = ["bash", "zsh", "sh"].map((s) => which(s)).filter((s): s is string => Boolean(s))
+  if (shells.length) return shells
   return ["/bin/bash", "/bin/zsh", "/bin/sh"]
 }
 
