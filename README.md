@@ -55,15 +55,8 @@ Before installing OpenChat, ensure your Termux environment has:
 | **Storage** | ~500 MB free for the repo + dependencies |
 | **RAM** | Minimum 2 GB recommended (4 GB+ for larger models) |
 | **Network** | Internet connection for AI provider API calls |
-| **Git** | `pkg install git` |
-| **Bun** | Installed automatically by the install script (see below) |
 
-### Recommended Termux Packages
-
-```bash
-pkg update && pkg upgrade
-pkg install git curl which ncurses-utils
-```
+> **Note:** The install script handles **everything** — Bun, Git, Node.js, and all system dependencies are installed automatically. You don't need to install anything beforehand.
 
 > **Note:** OpenChat works with **both** `bash` and `zsh`. The install script auto-detects your shell.
 
@@ -79,13 +72,14 @@ Run this single command in Termux:
 curl -fsSL https://raw.githubusercontent.com/dzshowrav/openchat-cli-occ-/main/install-termux.sh | bash
 ```
 
-The script will:
-1. Install **Bun** (if not already installed)
-2. Clone the OpenChat repository to `~/opc`
-3. Run `bun install` to install all dependencies
-4. Create the `occ` wrapper at `~/.local/bin/occ`
-5. Add `~/.local/bin` to your `PATH` (in `~/.bashrc` or `~/.zshenv`)
-6. Print a success message
+The script works on a **completely fresh Termux** and handles everything automatically:
+
+1. **System packages** — Installs `git`, `curl`, `termux-exec`, `ca-certificates`, `binutils`
+2. **Bun** — Installs from Termux repository (not `bun.sh` — avoids glibc compatibility issues)
+3. **Node.js** — Installed automatically (required by `protobufjs`)
+4. **OpenChat** — Clones the repo to `~/opc` and runs `bun install`
+5. **`occ` wrapper** — Creates `~/.local/bin/occ` and adds it to your `PATH`
+6. **Verification** — Confirms everything works
 
 After installation, **restart Termux** or run `source ~/.bashrc` (or `source ~/.zshenv` for zsh).
 
@@ -94,18 +88,24 @@ After installation, **restart Termux** or run `source ~/.bashrc` (or `source ~/.
 If you prefer to install step by step:
 
 ```bash
-# 1. Install Bun
-curl -fsSL https://bun.sh/install | bash
-source ~/.bashrc
+# 1. Install system dependencies
+pkg update
+pkg install -y git curl ca-certificates binutils termux-exec nodejs
 
-# 2. Clone the repository
+# 2. Add Termux Bun repository and install Bun
+echo "deb https://termuxvoid.github.io/repo termuxvoid main" >> $PREFIX/etc/apt/sources.list
+pkg update
+pkg install -y bun
+
+# 3. Clone the repository
 git clone https://github.com/dzshowrav/openchat-cli-occ- ~/opc
 
-# 3. Install dependencies
+# 4. Install JavaScript dependencies
 cd ~/opc
+export LD_PRELOAD=/data/data/com.termux/files/usr/lib/libtermux-exec-ld-preload.so
 bun install
 
-# 4. Create the occ wrapper
+# 5. Create the occ wrapper
 mkdir -p ~/.local/bin
 cat > ~/.local/bin/occ << 'EOF'
 #!/data/data/com.termux/files/usr/bin/bash
@@ -118,11 +118,11 @@ fi
 EOF
 chmod +x ~/.local/bin/occ
 
-# 5. Add to PATH
+# 6. Add to PATH
 echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.bashrc
 source ~/.bashrc
 
-# 6. Verify
+# 7. Verify
 occ --version
 ```
 
@@ -699,12 +699,28 @@ The repository is a **Bun monorepo** with workspaces. Key directories:
 
 #### Issue: `bun: command not found`
 
-**Solution:** Bun was not installed or PATH not updated.
+**Solution:** Bun was not installed or PATH not updated. In Termux, install from the package repository (not `bun.sh`):
 
 ```bash
-curl -fsSL https://bun.sh/install | bash
-export PATH="$HOME/.bun/bin:$PATH"
-# Add to ~/.bashrc: echo 'export PATH="$HOME/.bun/bin:$PATH"' >> ~/.bashrc
+pkg install bun
+```
+
+If you previously installed the glibc version from `bun.sh`, remove it first:
+
+```bash
+rm -f ~/.bun/bin/bun
+hash -r
+```
+
+#### Issue: `bun: cannot execute: required file not found`
+
+**Solution:** You installed Bun from `bun.sh`, which downloads a glibc-linked binary incompatible with Termux (which uses bionic libc). Fix by:
+
+```bash
+# Remove the broken binary
+mv ~/.bun/bin/bun ~/.bun/bin/bun.broken.glibc
+# Install the Termux-compatible version
+pkg install bun
 ```
 
 #### Issue: `occ: command not found`
@@ -730,12 +746,24 @@ pkg install termux-exec
 
 #### Issue: `bun install` fails
 
-**Solution:** Try cleaning and retrying.
+**Solution:** First make sure `nodejs` is installed (needed by `protobufjs` postinstall):
+
+```bash
+pkg install nodejs
+```
+
+Then clean and retry:
 
 ```bash
 cd ~/opc
 rm -rf node_modules
 bun install --no-cache
+```
+
+If it still fails, check the log:
+
+```bash
+tail -50 /tmp/opc-install.log
 ```
 
 #### Issue: Provider API errors
