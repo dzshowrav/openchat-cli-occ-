@@ -1,620 +1,814 @@
-# OpenChat — Terminal-Native AI Coding Assistant
+# OpenChat — AI Development Tool for Termux
 
-> **OpenChat** is a powerful, terminal-native AI coding assistant that runs entirely in your command line. It reads, writes, edits, searches, and executes code under AI guidance — all without leaving the terminal. Forked from the open-source [`opencode`](https://github.com/anomalyco/opencode) project (the open-source sibling of Anthropic's Claude Code CLI), OpenChat extends it with a **rich Terminal UI**, a **headless HTTP server**, a **desktop/web application**, and deep support for **multiple AI providers**.
+OpenChat is a full-featured AI-powered development assistant that runs entirely inside **Termux** on Android. It provides an interactive terminal UI (TUI) for chatting with AI models from multiple providers, managing sessions, generating code, and controlling your development workflow — all without leaving the terminal.
 
-[![Discord](https://img.shields.io/discord/1391832426048651334?style=flat-square&label=discord)](https://openchat.ai/discord)
-[![npm](https://img.shields.io/npm/v/openchat-ai?style=flat-square)](https://www.npmjs.com/package/openchat-ai)
-[![Build status](https://img.shields.io/github/actions/workflow/status/dzshowrav/openchat/publish.yml?style=flat-square&branch=dev)](https://github.com/dzshowrav/openchat/actions/workflows/publish.yml)
+**Version:** 1.18.4 | **License:** MIT | **Runtime:** Bun 1.3.14
 
 ---
 
-## ✨ Features
+## Table of Contents
 
-### Core AI Capabilities
-- **Multi-provider LLM support** — OpenAI (GPT-4o, o-series), Anthropic (Claude 3.5/4 Sonnet/Opus), Google Gemini, Azure OpenAI, AWS Bedrock, GitHub Copilot, XAI Grok, DeepSeek, Together AI, OpenRouter, Ollama (local), and 30+ OpenAI-compatible providers
-- **File operations** — read, write, edit, apply patches, search (grep/glob), move, delete files
-- **Shell execution** — run bash commands in your project directory with full permission controls
-- **Web search & fetch** — real-time internet access for up-to-date information
-- **Git integration** — commit, diff, log, status, branch management via natural language
-- **LSP integration** — language server diagnostics, symbol search, code navigation
-- **Multi-file editing** — coordinated edits across large codebases
-- **Code mode** — confined JavaScript/TypeScript sandbox execution
-
-### Terminal UI (TUI)
-- **Full-screen interactive chat interface** with split-pane layout
-- **Command palette** — `Ctrl+K` for quick actions
-- **Slash commands** — `/help`, `/exit`, `/uninstall`, `/clear`, and custom commands
-- **Theming system** — 9 built-in themes (Catppuccin, Dracula, Nord, Tokyo Night, Solarized, One Dark, Gruvbox, Everforest, Kanagawa)
-- **Dialog overlay stack** — alert, confirm, prompt, select, export, help dialogs
-- **Toast notifications** — for long-running operations
-- **Session scrollback** — review past assistant responses
-- **Thinking indicator** — real-time streaming progress
-- **Prompt history** — `Ctrl+R` reverse search through past prompts
-- **Session timeline** — browse, resume, delete, fork past sessions
-
-### Multi-Agent System
-- **build** — default full-access agent for development work (can edit files, run commands)
-- **plan** — read-only agent for code review, analysis, and exploration
-- **Subagents** — spawn `@general` subagents for complex multi-step research
-- **Custom agents** — define your own agents in `openchat.json`
-
-### Platform Support
-- **macOS** (Intel & Apple Silicon), **Linux**, **Windows** (via PowerShell), **Termux** (Android)
-- **Desktop app** — Electron-based GUI for macOS, Windows, and Linux
-- **Web app** — browser-based chat interface
-- **Headless server** — HTTP API server for remote access and CI/CD integration
-- **MCP server mode** — Model Context Protocol server for LLM tool integration
-
-### Plugin System
-- **V1 (Promise-based) plugins** — existing plugin ecosystem
-- **V2 (Effect-based) plugins** — next-gen plugin architecture with hot-reload
-- **Plugin catalog** — discover and install plugins from npm
-- **TUI plugins** — extend the terminal UI with custom components
+- [What is OpenChat?](#what-is-openchat)
+- [Prerequisites](#prerequisites)
+- [Installation](#installation)
+  - [Quick Install](#quick-install)
+  - [Manual Installation](#manual-installation)
+  - [Verification](#verification)
+- [The `occ` Command](#the-occ-command)
+- [How It Works](#how-it-works)
+- [CLI Commands Reference](#cli-commands-reference)
+- [First Run — Starting the TUI](#first-run--starting-the-tui)
+- [Configuration](#configuration)
+- [AI Providers Setup](#ai-providers-setup)
+- [Managing Sessions](#managing-sessions)
+- [Updating OpenChat](#updating-openchat)
+- [Uninstalling](#uninstalling)
+- [Project Structure](#project-structure)
+- [Troubleshooting](#troubleshooting)
+- [Frequently Asked Questions](#frequently-asked-questions)
 
 ---
 
-## 📦 Installation
+## What is OpenChat?
 
-### Quick Install (curl)
+OpenChat is an AI coding assistant that runs as a **terminal UI (TUI)** inside Termux. It connects to various AI model providers (OpenAI, Anthropic, Google, Groq, Mistral, and many more) and lets you:
 
-```bash
-# Unix (macOS, Linux)
-curl -fsSL https://openchat.ai/install | bash
+- Chat with AI models interactively
+- Generate and edit code files
+- Run shell commands through the AI
+- Manage multiple chat sessions with history
+- Use slash commands for common operations
+- Work with Git, GitHub, and MCP servers
+- Export and import sessions
 
-# Android (Termux)
-curl -fsSL https://raw.githubusercontent.com/dzshowrav/openchat/refs/heads/dev/install-termux.sh | bash
-```
+Unlike cloud-based IDEs or web UIs, OpenChat runs fully inside your Termux environment with no external dependencies beyond a Bun runtime and network access to your chosen AI provider.
 
-### Package Managers
+---
 
-```bash
-# npm / bun / pnpm / yarn (latest stable)
-npm install -g openchat-ai@latest
+## Prerequisites
 
-# macOS — Homebrew (recommended, always up to date)
-brew install dzshowrav/tap/openchat
+Before installing OpenChat, ensure your Termux environment has:
 
-# macOS — Homebrew (official formula, updated less frequently)
-brew install openchat
-
-# Windows — Scoop
-scoop install openchat
-
-# Windows — Chocolatey
-choco install openchat
-
-# Arch Linux — Stable
-sudo pacman -S openchat
-
-# Arch Linux — Latest from AUR
-paru -S openchat-bin
-
-# Universal — mise
-mise use -g openchat
-
-# Nix
-nix run nixpkgs#openchat
-# or for latest dev branch:
-nix run github:dzshowrav/openchat
-```
-
-### Desktop App (BETA)
-
-OpenChat is also available as a desktop application:
-
-| Platform | Download |
+| Requirement | Details |
 |---|---|
-| macOS (Apple Silicon) | `openchat-desktop-mac-arm64.dmg` |
-| macOS (Intel) | `openchat-desktop-mac-x64.dmg` |
-| Windows | `openchat-desktop-windows-x64.exe` |
-| Linux | `.deb`, `.rpm`, or `.AppImage` |
+| **Termux** | Latest version from F-Droid (recommended) or GitHub. **Do not use the Play Store version** — it is outdated. |
+| **Storage** | ~500 MB free for the repo + dependencies |
+| **RAM** | Minimum 2 GB recommended (4 GB+ for larger models) |
+| **Network** | Internet connection for AI provider API calls |
+| **Git** | `pkg install git` |
+| **Bun** | Installed automatically by the install script (see below) |
 
-Download from the [releases page](https://github.com/dzshowrav/openchat/releases) or [openchat.ai/download](https://openchat.ai/download).
+### Recommended Termux Packages
 
 ```bash
-# macOS (Homebrew)
-brew install --cask openchat-desktop
-
-# Windows (Scoop)
-scoop bucket add extras
-scoop install extras/openchat-desktop
+pkg update && pkg upgrade
+pkg install git curl which ncurses-utils
 ```
 
-### Installation Directory
+> **Note:** OpenChat works with **both** `bash` and `zsh`. The install script auto-detects your shell.
 
-The install script respects this priority:
-1. `$OPENCHAT_INSTALL_DIR` — custom installation directory
-2. `$XDG_BIN_DIR` — XDG Base Directory Specification path
-3. `$HOME/bin` — standard user binary directory
-4. `$HOME/.openchat/bin` — default fallback
+---
+
+## Installation
+
+### Quick Install
+
+Run this single command in Termux:
 
 ```bash
-OPENCHAT_INSTALL_DIR=/usr/local/bin curl -fsSL https://openchat.ai/install | bash
-XDG_BIN_DIR=$HOME/.local/bin curl -fsSL https://openchat.ai/install | bash
+curl -fsSL https://raw.githubusercontent.com/dzshowrav/openchat-cli-occ-/main/install-termux.sh | bash
+```
+
+The script will:
+1. Install **Bun** (if not already installed)
+2. Clone the OpenChat repository to `~/opc`
+3. Run `bun install` to install all dependencies
+4. Create the `occ` wrapper at `~/.local/bin/occ`
+5. Add `~/.local/bin` to your `PATH` (in `~/.bashrc` or `~/.zshenv`)
+6. Print a success message
+
+After installation, **restart Termux** or run `source ~/.bashrc` (or `source ~/.zshenv` for zsh).
+
+### Manual Installation
+
+If you prefer to install step by step:
+
+```bash
+# 1. Install Bun
+curl -fsSL https://bun.sh/install | bash
+source ~/.bashrc
+
+# 2. Clone the repository
+git clone https://github.com/dzshowrav/openchat-cli-occ- ~/opc
+
+# 3. Install dependencies
+cd ~/opc
+bun install
+
+# 4. Create the occ wrapper
+mkdir -p ~/.local/bin
+cat > ~/.local/bin/occ << 'EOF'
+#!/data/data/com.termux/files/usr/bin/bash
+export LD_PRELOAD=/data/data/com.termux/files/usr/lib/libtermux-exec-ld-preload.so
+if [ $# -eq 0 ]; then
+  exec bun run --cwd "$HOME/opc/packages/openchat" --conditions=browser src/index.ts "$PWD"
+else
+  exec bun run --cwd "$HOME/opc/packages/openchat" --conditions=browser src/index.ts "$@"
+fi
+EOF
+chmod +x ~/.local/bin/occ
+
+# 5. Add to PATH
+echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.bashrc
+source ~/.bashrc
+
+# 6. Verify
+occ --version
+```
+
+### Verification
+
+After installation, verify everything works:
+
+```bash
+occ --version
+# Should output: openchat version X.X.X
+
+occ --help
+# Should show the OpenChat logo and full help text
+
+which occ
+# Should show: /data/data/com.termux/files/home/.local/bin/occ
 ```
 
 ---
 
-## 🚀 Quick Start
+## The `occ` Command
 
-### Start a Session
+`occ` is a shell wrapper script located at `~/.local/bin/occ`. It is the primary entry point for OpenChat.
+
+### How the Wrapper Works
 
 ```bash
-# Open the TUI (default)
-openchat
-
-# Start in non-interactive mode with a prompt
-openchat -p "Explain this codebase"
-
-# Continue a previous session
-openchat --continue
-# or by session ID
-openchat -s ses_07ca5401dffeDP8xOXOs2GU1o6
-
-# Fork a previous session (branch from it)
-openchat -s ses_previous_id --fork
+#!/data/data/com.termux/files/usr/bin/bash
+export LD_PRELOAD=/data/data/com.termux/files/usr/lib/libtermux-exec-ld-preload.so
+if [ $# -eq 0 ]; then
+  exec bun run --cwd "$HOME/opc/packages/openchat" --conditions=browser src/index.ts "$PWD"
+else
+  exec bun run --cwd "$HOME/opc/packages/openchat" --conditions=browser src/index.ts "$@"
+fi
 ```
 
-### Usage Modes
+**Key details:**
+
+| Aspect | Explanation |
+|---|---|
+| **`LD_PRELOAD`** | Required for proper `exec` behavior inside Termux. Without this, `bun` processes spawned by OpenChat may not work correctly. |
+| **`--cwd`** | Changes to the `packages/openchat` directory so Bun can resolve JSX and module imports correctly (specifically `@opentui/solid/jsx-dev-runtime`). |
+| **`--conditions=browser`** | Tells Bun to use browser-compatible module resolution, which is needed for SolidJS (the TUI framework). |
+| **`$PWD` passthrough** | When called with no arguments, the wrapper passes the **current directory** as the project path. This means `occ` always opens the TUI in the directory you're standing in. |
+| **No arguments = TUI** | Running `occ` without any arguments starts the full-screen interactive TUI in the current directory. |
+| **Arguments = CLI mode** | Passing arguments (e.g., `occ --help`, `occ run`, `occ generate`) runs the corresponding CLI command. |
+
+### Common Usage Patterns
+
+```bash
+# Start TUI in current directory
+occ
+
+# Start TUI in a specific project
+occ ~/projects/my-app
+
+# Show help
+occ --help
+
+# Check version
+occ --version
+
+# Run a generation command
+occ generate
+
+# Continue a specific session
+occ -s ses_abc123
+```
+
+---
+
+## How It Works
+
+### Architecture Overview
+
+OpenChat is a **monorepo** with 30+ packages. The core execution flow:
+
+```
+occ (wrapper)
+  └── bun run src/index.ts (yargs CLI entry)
+        ├── Starts internal HTTP server (for plugin/MCP communication)
+        ├── Spawns a Web Worker for background tasks
+        └── Runs the TUI renderer (SolidJS + OpenTUI)
+              ├── Footer input bar (type prompts here)
+              ├── Scrollback view (chat history)
+              ├── Provider API calls (via @ai-sdk/*)
+              └── Session persistence (SQLite via Drizzle ORM)
+```
+
+**Key Components:**
+
+| Component | Package | Role |
+|---|---|---|
+| **CLI Entry** | `packages/openchat` | Yargs-based CLI, command routing, TUI thread management |
+| **TUI Framework** | `packages/tui` | SolidJS-based terminal UI (split pane, scrollback, footer, dialogs, themes) |
+| **Core Engine** | `packages/core` | Session management, prompt routing, tool execution, Effect service layer |
+| **AI SDK** | `packages/llm` | AI provider abstraction (unified API across 15+ providers) |
+| **Protocol** | `packages/protocol` | Agent-Client Protocol (ACP) and Model Context Protocol (MCP) |
+| **Server** | `packages/server` | Internal HTTP server for MCP, plugins, and web access |
+| **Schema** | `packages/schema` | Data types, validation, and serialization |
+| **Plugin System** | `packages/plugin` | Third-party plugin host and runtime |
+| **SDK** | `packages/sdk` | Client SDK for programmatic access |
+
+### Technology Stack
+
+| Technology | Purpose |
+|---|---|
+| **Bun** | JavaScript runtime (faster than Node.js) |
+| **TypeScript** | All code is TypeScript |
+| **Effect** | Functional effect system for service orchestration, error handling, and concurrency |
+| **SolidJS** | Reactive UI framework for the terminal interface |
+| **OpenTUI** | Terminal UI component library (built on Bubble Tea philosophy) |
+| **Yargs** | CLI argument parsing |
+| **Drizzle ORM** | SQLite database for session persistence |
+| **@ai-sdk/** | Provider SDKs for 15+ AI model providers |
+| **tree-sitter** | Code parsing and syntax understanding |
+
+---
+
+## CLI Commands Reference
+
+OpenChat provides 20+ commands. Here is the complete reference:
+
+### Global Options
+
+These options work with **any** command:
+
+| Option | Alias | Description |
+|---|---|---|
+| `--version` | `-v` | Show version number |
+| `--help` | `-h` | Show help |
+| `--print-logs` | | Print internal logs to stdout |
+| `--log-level` | | Set log level: `DEBUG`, `INFO`, `WARN`, `ERROR` |
+| `--pure` | | Run without external plugins |
+| `completion` | | Generate shell completion script |
+
+### Commands
 
 | Command | Description |
 |---|---|
-| `openchat` | Full TUI (default) |
-| `openchat --mini` | Minimal interactive mode (prompt only) |
-| `openchat -p "prompt"` | Non-interactive: run prompt and exit |
-| `openchat -p "prompt" | Non-interactive with stdin pipe |
-| `openchat serve` | Start headless HTTP server |
-| `openchat web` | Start web interface |
-| `openchat mcp` | Run as MCP server |
+| **`$0`** (default) | Start the interactive TUI in the current directory. This is what `occ` runs with no arguments. |
+| **`run`** | Start the TUI in **mini mode** (minimal interface, no split pane). Run `occ run --help` for options. |
+| **`generate`** | Generate code or files using AI. |
+| **`account`** | Manage your OpenChat account and settings. |
+| **`providers`** | List and configure AI model providers. |
+| **`agent`** | Create and manage AI agents. |
+| **`models`** | List available AI models. |
+| **`session`** | Manage chat sessions (list, view, delete). |
+| **`serve`** | Start OpenChat in server mode (HTTP API). |
+| **`web`** | Start the web interface. |
+| **`mcp`** | Model Context Protocol server management. |
+| **`github`** | GitHub integration (PRs, issues, repos). |
+| **`pr`** | Pull request management. |
+| **`export`** | Export sessions to file. |
+| **`import`** | Import sessions from file. |
+| **`upgrade`** | Update OpenChat to the latest version. |
+| **`uninstall`** | Remove OpenChat from the system. |
+| **`stats`** | View usage statistics. |
+| **`debug`** | Debugging tools (config, file, LSP, snapshot, etc.). Has 12 subcommands. |
+| **`attach`** | Attach to a running OpenChat process. |
+| **`acp`** | Agent-Client Protocol commands. |
+| **`db`** | Database management. |
+| **`plug`** | Plugin management. |
 
-### TUI Keybindings
+### TUI-Specific Options
+
+When running `occ` (the default TUI command), these options are available:
+
+| Option | Alias | Description |
+|---|---|---|
+| `--model` | `-m` | Specify model in format `provider/model` |
+| `--continue` | `-c` | Continue the last session |
+| `--session` | `-s` | Continue a specific session by ID |
+| `--fork` | | Fork the session when continuing (use with `--continue` or `--session`) |
+| `--prompt` | | Initial prompt to send |
+| `--agent` | | Agent to use |
+| `--auto` | | Auto-approve permissions not explicitly denied |
+| `--mini` | | Start minimal interface instead of full TUI |
+| `--no-replay` | | Disable mini session history replay on resume |
+| `--replay-limit` | | Cap visible mini replay to the newest N messages |
+
+### Example Commands
+
+```bash
+# Start TUI in current project
+occ
+
+# Start TUI with a specific model
+occ -m anthropic/claude-sonnet-4-20250514
+
+# Continue the last session
+occ -c
+
+# Continue a specific session
+occ -s ses_abc123
+
+# Fork a session (create new branch from existing)
+occ -c --fork
+
+# Start with a prompt
+occ --prompt "Refactor this codebase to use Effect"
+
+# Start in mini mode
+occ --mini
+
+# Run a generation task
+occ generate "Create a React component for a data table"
+
+# List all sessions
+occ session list
+```
+
+---
+
+## First Run — Starting the TUI
+
+After installation, simply run:
+
+```bash
+occ
+```
+
+This will:
+1. Display the OpenChat logo and banner
+2. Start the internal server
+3. Launch the full-screen TUI
+4. Show a welcome message with session info
+
+### TUI Layout
+
+The TUI has a **split-pane layout**:
+
+```
+┌──────────────────────────────────────────────┐
+│  Logo / Banner                               │
+│                                              │
+│  ┌──────────────────┬──────────────────────┐ │
+│  │                  │                      │ │
+│  │  Chat History    │  Preview / Code      │ │
+│  │  (Scrollback)    │  (Editor)            │ │
+│  │                  │                      │ │
+│  │                  │                      │ │
+│  └──────────────────┴──────────────────────┘ │
+│                                              │
+│  > Type your prompt here...         [Send]   │
+│  ──────────────────────────────────────────  │
+│  Status bar / Controls                      │
+└──────────────────────────────────────────────┘
+```
+
+### Basic TUI Controls
 
 | Key | Action |
 |---|---|
-| `Tab` | Switch between build/plan agents |
-| `Ctrl+K` | Open command palette |
-| `Ctrl+P` | Open session picker |
-| `Ctrl+R` | Reverse-search prompt history |
-| `Ctrl+L` | Clear scrollback |
-| `Ctrl+D` | Toggle thinking indicator |
-| `Ctrl+C` | Cancel current generation |
-| `Escape` | Close dialog / cancel |
-| `Enter` | Send prompt / confirm |
-| `Up/Down` | Navigate history / options |
+| **Type & Enter** | Send a prompt to the AI |
+| **Ctrl+C** | Cancel current generation |
+| **Tab** | Focus next pane |
+| **Shift+Tab** | Focus previous pane |
+| **Ctrl+P** | Command palette |
+| **Ctrl+N** | New session |
+| **Ctrl+D** | Toggle dark/light mode |
+| **Ctrl+W** | Close pane |
+| **Ctrl+Q** | Quit |
+| **/** | Focus search |
+| **Escape** | Close dialog / cancel |
 
 ### Slash Commands
 
-| Command | Description |
+Type `/` in the prompt to see available slash commands:
+
+| Command | Action |
 |---|---|
-| `/help` | Show help information |
-| `/clear` | Clear the scrollback |
 | `/exit` | Exit OpenChat |
-| `/uninstall` | Remove the `occ` wrapper and CLI |
-| Custom | Commands from plugins or `openchat.json` |
+| `/clear` | Clear scrollback |
+| `/session` | Session management |
+| `/model` | Switch model |
+| `/agent` | Switch agent |
+| `/help` | Show help |
+| `/uninstall` | Remove occ wrapper files |
 
 ---
 
-## ⚙️ Configuration
+## Configuration
 
-### Providers & Models
+OpenChat stores configuration in the OpenChat config directory (created automatically on first run).
 
-OpenChat supports a wide range of AI providers. Configure which provider and model to use:
+### Config Location
 
-```bash
-# Set provider via environment variable
-export OPENCHAT_PROVIDER=openai
-
-# Set API key
-export OPENAI_API_KEY=sk-...
-export ANTHROPIC_API_KEY=sk-ant-...
-
-# Or use the providers command
-openchat providers set
-openchat models
+```
+~/.config/openchat/
+├── config.json         # Main configuration
+├── providers.json      # Provider API keys and settings
+├── keybind.json        # Custom keybindings
+├── theme.json          # Theme settings
+└── sessions.db         # SQLite database for sessions
 ```
 
-**Supported providers:**
+### Key Configuration Options
 
-| Provider | Env Variable | Models |
-|---|---|---|
-| OpenAI | `OPENAI_API_KEY` | GPT-4o, o1, o3, GPT-4.1, GPT-4.1-mini |
-| Anthropic | `ANTHROPIC_API_KEY` | Claude 4 Sonnet, Claude 4 Opus, Claude 3.5 Sonnet, Claude 3.5 Haiku |
-| Google Gemini | `GEMINI_API_KEY` | Gemini 2.5 Pro, Gemini 2.5 Flash |
-| Azure OpenAI | `AZURE_OPENAI_API_KEY` | All Azure-deployed models |
-| AWS Bedrock | AWS credentials | Claude, Llama, Mistral via Bedrock |
-| GitHub Copilot | `GITHUB_TOKEN` | GPT-4o, Claude Sonnet (Copilot models) |
-| XAI Grok | `XAI_API_KEY` | Grok-2, Grok-3 |
-| DeepSeek | `DEEPSEEK_API_KEY` | DeepSeek V3, DeepSeek R1 |
-| Together AI | `TOGETHER_API_KEY` | 100+ open models |
-| OpenRouter | `OPENROUTER_API_KEY` | 200+ models from all providers |
-| Ollama | `OLLAMA_BASE_URL` | All local Ollama models |
-| Cloudflare | `CLOUDFLARE_API_TOKEN` | Workers AI models |
-| Snowflake Cortex | Snowflake credentials | Snowflake Cortex AI |
-| DigitalOcean | `DIGITALOCEAN_TOKEN` | DO GPU models |
-| GitLab | `GITLAB_API_TOKEN` | GitLab AI models |
-| Poe | `POE_API_KEY` | Poe platform models |
-
-### openchat.json
-
-Create an `openchat.json` in your project root for custom configuration:
+OpenChat uses a JSON-based configuration system. Key settings include:
 
 ```json
 {
-  "provider": {
-    "model": "claude-sonnet-4-20250514"
+  "theme": "catppuccin-mocha",
+  "model": "anthropic/claude-sonnet-4-20250514",
+  "providers": {
+    "anthropic": { "apiKey": "sk-ant-..." },
+    "openai": { "apiKey": "sk-..." }
   },
-  "agent": {
-    "build": {
-      "permissions": {
-        "allow": ["read", "write", "edit", "bash", "grep", "glob"]
-      }
-    },
-    "plan": {
-      "permissions": {
-        "deny": ["write", "edit", "bash"]
-      }
-    }
-  },
-  "plugins": [
-    {
-      "name": "my-plugin",
-      "path": "./plugins/my-plugin.js"
-    }
-  ],
-  "commands": [
-    {
-      "name": "deploy",
-      "description": "Deploy to production",
-      "prompt": "Run the deployment process for this project"
-    }
-  ],
-  "experimental": {
-    "backgroundSubagents": true,
-    "toolCallParsingStrict": true
-  },
-  "formatters": [
-    {
-      "pattern": "*.ts",
-      "command": "bun run format"
-    }
-  ]
+  "autoApprove": false,
+  "replayLimit": 50
 }
 ```
 
----
+### Available Themes
 
-## 🏗️ Project Architecture
-
-OpenChat is organized as a **Bun monorepo** with **30+ packages** under `packages/`.
-
-```
-opc/
-├── packages/
-│   ├── openchat/        # Main CLI application & TUI runtime
-│   ├── core/            # Domain logic & Effect services (@openchat-ai/core)
-│   ├── tui/             # Terminal UI (SolidJS + OpenTUI)
-│   ├── llm/             # LLM abstraction layer (@openchat-ai/llm)
-│   ├── schema/          # Wire contracts & storage schemas (@openchat-ai/schema)
-│   ├── protocol/        # HTTP API protocol definitions
-│   ├── server/          # HTTP server implementation
-│   ├── client/          # Auto-generated HTTP client
-│   ├── sdk-next/        # Next-gen in-process SDK
-│   ├── sdk/             # Legacy JavaScript SDK
-│   ├── plugin/          # Plugin SDK (V1 Promise + V2 Effect)
-│   ├── ui/              # Shared web UI components
-│   ├── app/             # Desktop/Web application (Electron + SolidJS)
-│   ├── web/             # Public website (Astro + Starlight)
-│   ├── codemode/        # Sandboxed JS/TS execution
-│   ├── containers/      # Containerized tool execution
-│   ├── slack/           # Slack integration
-│   ├── docs/            # Documentation site
-│   ├── stats/           # Usage statistics
-│   └── ...              # 15+ more packages
-├── specs/               # Design specifications
-├── script/              # Build & utility scripts
-├── sdks/                # Generated SDK artifacts
-├── infra/               # Infrastructure (SST)
-├── patches/             # Dependency patches
-└── nix/                 # Nix packaging
-```
-
-### Dependency Flow
-
-```
-Schema → Core → Protocol → Server
-       ↘ Client → SDK
-Plugin → (independent)
-   TUI → Core + Plugin + SDK
-```
-
-- **Schema** — zero runtime dependencies (Effect-only). Defines all domain types.
-- **Core** — domain backbone. All business logic, database, tools, sessions, config, permissions, providers.
-- **Protocol** — HTTP API route definitions (no runtime imports).
-- **Server** — concrete HTTP server (Protocol + Core).
-- **Client** — auto-generated HTTP client (Schema + Protocol only).
-- **TUI** — SolidJS terminal UI (Core + Plugin + SDK).
-
-### Key Architectural Layers
-
-#### Session V2 (Durable Sessions)
-- Sessions are persisted via SQLite + Drizzle ORM
-- `SessionV2.prompt(...)` admits a durable input row before scheduling execution
-- `SessionExecution` is process-global, session-ID based
-- `SessionRunner` is Location-scoped (model resolution, tool registry, permissions)
-- Context epochs manage system prompt caching boundaries
-- Delivery modes: `steer` (default, promotes at next provider turn), `queue` (promotes at idle boundary)
-
-#### Tool System
-- Canonical `Tool.make(...)` with typed Effect Schema input/output
-- Built-in tools: `bash`, `edit`, `write`, `read`, `grep`, `glob`, `websearch`, `webfetch`, `apply_patch`, `question`, `skill`, `todo`, `task`, `lsp`, `plan`, `truncate`
-- Tool Registry is Location-scoped with process-scoped application tool overrides
-- Permission controls per agent (allow/deny individual tools)
-
-#### Plugin System (V2)
-- Effect-based services with add/remove lifecycle and hot-reload
-- Plugin types: agent, command, context, event, filesystem, integration, location, npm, reference, skill
-- Plugin catalog with npm discovery
-
-#### Config System
-- Multi-source merge: JSON files, remote URLs, environment variables
-- Array concatenation strategy
-- Supports `openchat.json` (V1) and migrating to V2
+The TUI ships with multiple built-in themes including Catppuccin (mocha, macchiato, frappe, latte), Dracula, Nord, Tokyo Night, and more. Themes can be cycled with `Ctrl+D`.
 
 ---
 
-## 🖥️ Commands
+## AI Providers Setup
 
-### General Commands
+OpenChat supports 15+ AI providers out of the box. You need at least **one API key** to use the tool.
 
-| Command | Description |
-|---|---|
-| `openchat` | Start the TUI (default) |
-| `openchat -p "text"` | Run a prompt and exit |
-| `openchat --mini` | Start minimal interactive mode |
-| `openchat --continue` | Resume last session |
-| `openchat -s <id>` | Resume a specific session |
-| `openchat --fork` | Fork a session on resume |
+### Supported Providers
 
-### CLI Subcommands
-
-| Command | Description |
-|---|---|
-| `openchat serve` | Start headless HTTP server |
-| `openchat web` | Start web interface |
-| `openchat mcp` | Run as MCP server |
-| `openchat acp` | Agent-to-agent communication |
-| `openchat generate` | Generate code from templates |
-| `openchat debug` | Debug utilities |
-| `openchat account` | Account management |
-| `openchat providers` | Provider configuration |
-| `openchat agent` | Agent management |
-| `openchat models` | List available models |
-| `openchat upgrade` | Upgrade OpenChat |
-| `openchat uninstall` | Uninstall OpenChat |
-| `openchat session` | Session management |
-| `openchat plugin` | Plugin management |
-| `openchat export` | Export session data |
-| `openchat import` | Import session data |
-| `openchat github` | GitHub integration |
-| `openchat pr` | Pull request management |
-| `openchat stats` | Usage statistics |
-| `openchat db` | Database management |
-| `openchat completion` | Shell completion generation |
-| `openchat help` | Show help |
-
-### Global Flags
-
-| Flag | Description |
-|---|---|
-| `--print-logs` | Print debug logs to stderr |
-| `--log-level <level>` | Set log level (debug, info, warn, error) |
-| `--pure` | Run without external plugins |
-
----
-
-## 🔧 Development
-
-### Prerequisites
-
-- **Bun** 1.2.x+ — [install bun](https://bun.sh)
-- **Node.js** 22+ (optional, for some tooling)
-
-### Setup
-
-```bash
-# Clone the repository
-git clone https://github.com/dzshowrav/openchat.git
-cd openchat
-
-# Install dependencies
-bun install
-
-# Build packages
-bun run build
-```
-
-### Development Workflow
-
-```bash
-# Run TUI in development mode
-cd packages/openchat
-bun run dev
-
-# Run tests
-bun run test
-
-# Type check
-bun run typecheck
-
-# Generate client SDK (after changing Protocol)
-cd packages/client
-bun run generate
-
-# Regenerate legacy JS SDK
-./packages/sdk/js/script/build.ts
-```
-
-### Project Conventions
-
-- **Branch names**: short, 3 words max, hyphen-separated (e.g., `session-recovery`)
-- **Commit messages**: conventional format — `type(scope): summary` (types: feat, fix, docs, chore, refactor, test)
-- **Style**:
-  - Prefer `const` over `let`, early returns over `else`
-  - No aliased or star imports
-  - No explicit types when inference works
-  - Functional array methods over for loops
-  - No `try/catch` where avoidable
-  - No `any` type
-- **Testing**: run from package directories, not repo root
-- **Type checking**: use `bun typecheck` from package directories
-
----
-
-## 🎨 Theme System
-
-OpenChat includes 9 built-in themes for the TUI:
-
-| Theme | Description |
-|---|---|
-| **Catppuccin Mocha** | Dark, warm purple-based (default) |
-| **Dracula** | Dark, purple/cyan accents |
-| **Nord** | Arctic, blue-gray |
-| **Tokyo Night** | Dark blue/purple |
-| **Solarized Dark** | Warm dark amber |
-| **One Dark** | Atom-inspired dark |
-| **Gruvbox** | Retro dark |
-| **Everforest** | Green-tinted dark |
-| **Kanagawa** | Japanese ink wash-inspired |
-
-Switch themes in the TUI via the command palette (`Ctrl+K` → search "theme").
-
----
-
-## 🤝 Plugin Development
-
-Plugins extend OpenChat with custom tools, providers, commands, and UI components.
-
-### V2 Plugin (Effect-based)
-
-```typescript
-import { PluginV2 } from "@openchat-ai/plugin/v2/effect"
-import { Effect, Layer } from "effect"
-
-const MyPlugin = PluginV2.make({
-  name: "my-plugin",
-  version: "1.0.0",
-  setup: Effect.gen(function* () {
-    // Register tools, commands, or context providers
-  }),
-  cleanup: Effect.gen(function* () {
-    // Teardown logic
-  }),
-})
-```
-
-### V1 Plugin (Promise-based)
-
-```javascript
-export default {
-  name: "my-plugin",
-  async setup(context) {
-    // context: { tools, commands, events, config }
-    context.tools.register({
-      name: "my-tool",
-      description: "My custom tool",
-      execute: async (input) => {
-        return { result: "hello from my plugin" }
-      },
-    })
-  },
-}
-```
-
----
-
-## 🌐 Server Mode
-
-OpenChat can run as a headless HTTP server with a full REST + WebSocket API.
-
-```bash
-# Start the server
-openchat serve --port 8080
-
-# With mDNS discovery
-openchat serve --mdns
-
-# Enable CORS for web clients
-openchat serve --cors http://localhost:5173
-```
-
-The server implements the full `HttpApi` protocol with endpoints for sessions, messages, agents, models, providers, filesystem operations, permissions, and more.
-
----
-
-## 📱 Termux (Android) Support
-
-OpenChat works on Android via Termux:
-
-```bash
-# Install in Termux
-curl -fsSL https://raw.githubusercontent.com/dzshowrav/openchat/refs/heads/dev/install-termux.sh | bash
-
-# Or from the repo
-./install-termux.sh
-```
-
-Note: Some features (e.g., Turbo repo builds, desktop integration) may not be available on Android.
-
----
-
-## 🔒 Permissions System
-
-OpenChat implements a granular permission model for safety:
-
-- **Agent-level permissions** — each agent has its own set of allowed/denied tools
-- **Tool-level permissions** — `allow`, `deny`, and `ask` (default) for each tool
-- **Auto-approve mode** — `--yolo` / `--auto` for non-interactive usage (dangerous!)
-- **Host tool restriction** — certain tools are host-restricted (cannot be overridden by config)
-
-### Default Permissions
-
-| Tool | build | plan |
+| Provider | Package | Setup |
 |---|---|---|
-| read | ✅ allow | ✅ allow |
-| write | ✅ allow | ❌ deny |
-| edit | ✅ allow | ❌ deny |
-| apply_patch | ✅ allow | ❌ deny |
-| bash | ✅ allow | ⚠️ ask |
-| grep | ✅ allow | ✅ allow |
-| glob | ✅ allow | ✅ allow |
-| websearch | ✅ allow | ✅ allow |
-| webfetch | ✅ allow | ✅ allow |
-| question | ✅ allow | ✅ allow |
-| task | ✅ allow | ✅ allow |
+| **Anthropic (Claude)** | `@ai-sdk/anthropic` | Set `ANTHROPIC_API_KEY` env var or configure in providers |
+| **OpenAI (GPT)** | `@ai-sdk/openai` | Set `OPENAI_API_KEY` env var |
+| **Google (Gemini)** | `@ai-sdk/google` | Set `GOOGLE_GENERATIVE_AI_API_KEY` env var |
+| **Groq** | `@ai-sdk/groq` | Set `GROQ_API_KEY` env var |
+| **Mistral** | `@ai-sdk/mistral` | Set `MISTRAL_API_KEY` env var |
+| **Perplexity** | `@ai-sdk/perplexity` | Set `PERPLEXITY_API_KEY` env var |
+| **xAI (Grok)** | `@ai-sdk/xai` | Set `XAI_API_KEY` env var |
+| **Cohere** | `@ai-sdk/cohere` | Set `COHERE_API_KEY` env var |
+| **Cerebras** | `@ai-sdk/cerebras` | Set `CEREBRAS_API_KEY` env var |
+| **DeepInfra** | `@ai-sdk/deepinfra` | Set `DEEPINFRA_API_KEY` env var |
+| **Together AI** | `@ai-sdk/togetherai` | Set `TOGETHER_API_KEY` env var |
+| **Alibaba (Qwen)** | `@ai-sdk/alibaba` | Set `ALIBABA_API_KEY` env var |
+| **OpenRouter** | `@openrouter/ai-sdk-provider` | Set `OPENROUTER_API_KEY` env var |
+| **Venice AI** | `venice-ai-sdk-provider` | Set `VENICE_API_KEY` env var |
+| **Azure OpenAI** | `@ai-sdk/azure` | Azure endpoint + key |
+| **AWS Bedrock** | `@ai-sdk/amazon-bedrock` | AWS credentials |
+
+### Setting Up API Keys
+
+**Method 1: Environment Variables** (recommended)
+
+Add to your `~/.bashrc` or `~/.zshenv`:
+
+```bash
+export ANTHROPIC_API_KEY="sk-ant-..."
+export OPENAI_API_KEY="sk-..."
+```
+
+Then reload: `source ~/.bashrc`
+
+**Method 2: Configuration File**
+
+OpenChat creates a `providers.json` file on first run. You can edit it to add keys.
+
+**Method 3: TUI Provider Command**
+
+From the command line:
+```bash
+occ providers
+```
+
+### Selecting a Model
+
+In the TUI:
+1. Press `Ctrl+P` to open the command palette
+2. Search for "model" or "switch model"
+3. Select from the list of configured providers
+
+Or from CLI:
+```bash
+occ -m anthropic/claude-sonnet-4-20250514
+```
 
 ---
 
-## 📄 License
+## Managing Sessions
 
-This project is licensed under the MIT License — see the LICENSE file for details.
+OpenChat automatically creates a **new session** each time you start the TUI (unless you use `--continue` or `--session`).
 
-Based on [opencode](https://github.com/anomalyco/opencode), the open-source version of Anthropic's Claude Code CLI.
+### Session Features
+
+| Feature | Description |
+|---|---|
+| **Auto-save** | Every message is saved to SQLite automatically |
+| **History replay** | On resume, previous messages are replayed in the scrollback |
+| **Session listing** | View all sessions with `occ session list` |
+| **Continue** | Resume a session with `occ -s <session_id>` or `occ -c` (last session) |
+| **Forking** | Create a branch from an existing session with `--fork` |
+| **Export/Import** | Sessions can be exported to JSON and imported back |
+
+### Session ID Format
+
+```
+ses_<timestamp><random>
+```
+
+Example: `ses_07ca5401dffeDP8xOXOs2GU1o6`
+
+### CLI Session Commands
+
+```bash
+# List all sessions
+occ session list
+
+# View session details
+occ session show <session_id>
+
+# Delete a session
+occ session delete <session_id>
+
+# Continue the last session
+occ -c
+
+# Continue a specific session
+occ -s ses_abc123
+
+# Fork a session
+occ -c --fork
+```
 
 ---
 
-## 🙏 Acknowledgements
+## Updating OpenChat
 
-- [Anthropic](https://anthropic.com) for Claude and the original Claude Code
-- [anomalyco](https://github.com/anomalyco) for the opencode project
-- [Effect](https://effect.website) for the functional effect system
-- [SolidJS](https://solidjs.com) for reactive UI
-- [OpenTUI](https://github.com/sst/opentui) for terminal UI framework
-- [Bun](https://bun.sh) for the fast JavaScript runtime
+The repository is on the `main` branch (configured for active development).
+
+### Update Command
+
+```bash
+occ upgrade
+```
+
+This pulls the latest changes from the GitHub repository and re-runs `bun install`.
+
+### Manual Update
+
+```bash
+cd ~/opc
+git pull
+bun install
+```
+
+### Checking Version
+
+```bash
+occ --version
+# or
+occ -v
+```
 
 ---
 
-## 🆘 Support
+## Uninstalling
 
-- **Discord**: [openchat.ai/discord](https://openchat.ai/discord)
-- **Issues**: [GitHub Issues](https://github.com/dzshowrav/openchat/issues)
-- **Website**: [openchat.ai](https://openchat.ai)
+OpenChat provides two uninstall mechanisms:
+
+### Method 1: In-App (from TUI)
+
+While in the TUI, type:
+
+```
+/uninstall
+```
+
+This removes `~/.local/bin/occ` and `~/.local/bin/occ-install` at runtime.
+
+### Method 2: CLI Command
+
+```bash
+occ uninstall
+```
+
+This performs a full package uninstall.
+
+### Method 3: Manual
+
+```bash
+# Remove the occ wrapper
+rm ~/.local/bin/occ ~/.local/bin/occ-install
+
+# Remove the repository
+rm -rf ~/opc
+
+# Remove configuration (optional)
+rm -rf ~/.config/openchat
+
+# Remove from PATH (edit ~/.bashrc or ~/.zshenv)
+# Remove the line: export PATH="$HOME/.local/bin:$PATH"
+```
+
+---
+
+## Project Structure
+
+The repository is a **Bun monorepo** with workspaces. Key directories:
+
+```
+~/opc/
+├── AGENTS.md                    # AI agent rules and coding conventions
+├── CONTRIBUTING.md              # Contribution guidelines
+├── CONTEXT.md                   # Project context for AI agents
+├── bun.lock                     # Bun lockfile
+├── bunfig.toml                  # Bun configuration
+├── package.json                 # Root package.json (workspaces)
+├── tsconfig.json                # TypeScript configuration
+├── turbo.json                   # Turbo repo configuration
+├── install                      # Desktop installer script
+├── install-termux.sh            # Termux installer script
+│
+├── packages/
+│   ├── openchat/                # Main CLI entry point
+│   │   └── src/
+│   │       ├── index.ts         # CLI entry (yargs)
+│   │       ├── cli/
+│   │       │   ├── cmd/         # All CLI commands (20+ files)
+│   │       │   │   ├── run/     # TUI runtime (37 files)
+│   │       │   │   ├── debug/   # Debug subcommands
+│   │       │   │   ├── tui.ts   # TUI thread handler
+│   │       │   │   └── ...
+│   │       │   ├── ui.ts        # Terminal output helpers
+│   │       │   └── tui/         # TUI worker
+│   │       ├── config/          # Configuration modules
+│   │       ├── effect/          # Effect service layer
+│   │       ├── plugin/          # Plugin host runtime
+│   │       ├── project/         # Project/instance management
+│   │       ├── server/          # Server management
+│   │       └── util/            # Utilities
+│   │
+│   ├── tui/                     # TUI framework (SolidJS + OpenTUI)
+│   │   └── src/
+│   │       ├── app.tsx          # Main TUI app component
+│   │       ├── routes/session/  # Session view (chat UI)
+│   │       ├── component/       # UI components
+│   │       ├── context/         # SolidJS context providers
+│   │       └── util/            # Utilities
+│   │
+│   ├── core/                    # Core engine
+│   ├── server/                  # HTTP server
+│   ├── protocol/                # ACP + MCP protocols
+│   ├── schema/                  # Data schema
+│   ├── sdk/                     # Client SDK
+│   ├── plugin/                  # Plugin system
+│   ├── llm/                     # AI provider abstraction
+│   ├── codemode/                # Code generation mode
+│   ├── client/                  # API client
+│   ├── web/                     # Web interface
+│   ├── app/                     # Web app
+│   └── ... (more packages)
+│
+├── script/                      # Build scripts
+├── specs/                       # Specifications and docs
+├── infra/                       # Infrastructure configs
+├── nix/                         # Nix flake support
+└── sdks/                        # Third-party SDKs
+```
+
+---
+
+## Troubleshooting
+
+### Common Issues
+
+#### Issue: `bun: command not found`
+
+**Solution:** Bun was not installed or PATH not updated.
+
+```bash
+curl -fsSL https://bun.sh/install | bash
+export PATH="$HOME/.bun/bin:$PATH"
+# Add to ~/.bashrc: echo 'export PATH="$HOME/.bun/bin:$PATH"' >> ~/.bashrc
+```
+
+#### Issue: `occ: command not found`
+
+**Solution:** `~/.local/bin` is not in your PATH.
+
+```bash
+echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.bashrc
+source ~/.bashrc
+```
+
+#### Issue: `LD_PRELOAD` errors
+
+**Solution:** Ensure `libtermux-exec` is installed.
+
+```bash
+pkg install termux-exec
+```
+
+#### Issue: TUI shows garbled characters
+
+**Solution:** Your terminal may not support UTF-8 or the required Unicode characters. Ensure you are using a modern Termux build (from F-Droid) with a Unicode-compatible font.
+
+#### Issue: `bun install` fails
+
+**Solution:** Try cleaning and retrying.
+
+```bash
+cd ~/opc
+rm -rf node_modules
+bun install --no-cache
+```
+
+#### Issue: Provider API errors
+
+**Solution:** Check that your API key is set correctly.
+
+```bash
+echo $ANTHROPIC_API_KEY  # Should show your key
+```
+
+If not set, add to `~/.bashrc` and run `source ~/.bashrc`.
+
+#### Issue: Session not found
+
+```bash
+occ session list  # See all available sessions
+occ -s <exact_session_id>  # Use exact ID
+```
+
+#### Issue: Out of memory
+
+**Solution:** Close other apps or use a smaller model. Models like `claude-sonnet` require less memory than `claude-opus`.
+
+### Debug Mode
+
+For detailed troubleshooting, enable debug logging:
+
+```bash
+occ --log-level DEBUG
+# or
+OPENCHAT_LOG_LEVEL=DEBUG occ
+```
+
+### Getting Help
+
+If you encounter issues not covered here:
+
+1. Run `occ --help` for CLI usage
+2. Check the `/help` slash command inside the TUI
+3. Open an issue on GitHub: https://github.com/dzshowrav/openchat-cli-occ-/issues
+
+---
+
+## Frequently Asked Questions
+
+### Does OpenChat work without internet?
+
+No. OpenChat requires internet access to make API calls to AI providers. The TUI itself works offline, but no AI responses will be generated.
+
+### Can I use OpenChat with local models?
+
+OpenChat connects to remote API providers. Local model support depends on the provider — services like Ollama can be used via OpenAI-compatible endpoints.
+
+### Are my API keys stored securely?
+
+API keys can be set as environment variables (not stored on disk) or stored in the configuration file. The config file is in your home directory with standard file permissions.
+
+### Can I run multiple sessions simultaneously?
+
+Yes. Each `occ` invocation creates a new session. You can run multiple instances in different terminal sessions.
+
+### Does OpenChat support image analysis?
+
+Yes, for providers that support multimodal inputs (Claude, GPT-4V, Gemini), you can include images in your prompts.
+
+### Can OpenChat execute shell commands?
+
+Yes. OpenChat can execute shell commands in your Termux environment when the AI requests it. You will be prompted for approval unless `--auto` is enabled.
+
+### How do I contribute?
+
+See `CONTRIBUTING.md` in the repository root. The project follows conventional commit style (`type(scope): summary`) with types `feat`, `fix`, `docs`, `chore`, `refactor`, `test`.
+
+### What is the difference between `occ` and `openchat`?
+
+`occ` is the shorthand command. `openchat` is the full command name. Both refer to the same tool.
+
+---
+
+*OpenChat v1.18.4 — Built with Bun, TypeScript, Effect, and SolidJS*
