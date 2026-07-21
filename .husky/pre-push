@@ -17,4 +17,9 @@ if (process.versions.bun !== expectedBunVersion) {
   console.warn(`Warning: Bun version ${process.versions.bun} differs from expected ${expectedBunVersion}`);
 }
 '
-bun typecheck
+# Skip typecheck on unsupported platforms
+if [ "$(uname -m)" = "aarch64" ] && [ "$(uname -o)" = "Android" ]; then
+  echo "Skipping typecheck on Android/Termux (turbo not supported)"
+else
+  bun typecheck
+fi
