@@ -284,11 +284,10 @@ async function showTerminalCountdown(durationMs: number): Promise<boolean> {
       const remaining = Math.max(0, (durationMs - elapsed) / 1000)
 
       if (progress >= 1) {
-        process.stderr.write(`  ${bar}  Done!\n`)
         if (!cancelled) {
           cancelled = true
           cleanup()
-          process.stderr.write("\n")
+          process.stderr.write(`  ${bar}  Done!\n`)
           resolve(true)
         }
         return
