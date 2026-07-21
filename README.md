@@ -555,7 +555,9 @@ occ -c --fork
 
 ## Updating OpenChat
 
-The repository is on the `main` branch (configured for active development).
+The repository is on the `main` branch (configured for active development).  
+Updates are **source-based** — the `occ` wrapper always runs the current source in `~/opc`.  
+You never need to reinstall from scratch; just sync the source and dependencies.
 
 ### Update Command
 
@@ -565,13 +567,15 @@ occ upgrade
 
 This pulls the latest changes from the GitHub repository and re-runs `bun install`.
 
-### Manual Update
+### Manual Update (recommended)
 
 ```bash
 cd ~/opc
 git pull
 bun install
 ```
+
+That is all. The `occ` wrapper stays untouched — it always executes `bun run src/index.ts` from the openchat package, so a source update is sufficient.
 
 ### Checking Version
 
