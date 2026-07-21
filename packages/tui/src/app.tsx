@@ -358,7 +358,7 @@ export const run = Effect.fn("Tui.run")(function* (input: TuiInput) {
     win32FlushInputBuffer()
     if (result.reason !== undefined)
       process.stderr.write((cliErrorMessage(result.reason) ?? errorFormat(result.reason)) + "\n")
-    if (result.epilogue) process.stdout.write(result.epilogue + "\n")
+    result.epilogue // no-op — epilogue stored for tests only
   })
 })
 
