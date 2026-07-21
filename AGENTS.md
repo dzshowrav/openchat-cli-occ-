@@ -159,3 +159,9 @@ const table = sqliteTable("session", {
 - Keep delivery vocabulary explicit. Prompts steer by default and promote at the next safe provider-turn boundary while the current drain requires continuation. An explicit `queue` input remains pending until the Session would otherwise become idle; promote one queued input at that boundary, then reevaluate continuation before promoting another. Promoting any new user input resets the selected agent's provider-turn allowance; a batch of steers resets it once.
 - Keep EventV2 replay owner claims separate from clustered Session execution ownership.
 - Keep the System Context algebra, registry, and built-ins in `src/system-context`; keep Context Source producers with their observed domains, and keep Session History selection plus Context Epoch persistence Session-owned.
+
+## `occ` wrapper
+
+The `occ` wrapper (`~/.local/bin/occ`) must use `bun run --cwd "$HOME/opc/packages/openchat"` for correct JSX module resolution (`@opentui/solid/jsx-dev-runtime` etc.). Without `--cwd`, bun fails to find the right `node_modules`.
+
+To let `occ` work from any project directory, the wrapper passes `$PWD` as the `[project]` positional when no arguments are given. This keeps module resolution working while telling the app to use the user's current directory as the project root.

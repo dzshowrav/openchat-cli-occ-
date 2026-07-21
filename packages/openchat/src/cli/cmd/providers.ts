@@ -376,6 +376,7 @@ export const ProvidersLoginCommand = effectCmd({
       anthropic: 4,
       openrouter: 5,
       vercel: 6,
+      opencode: 7,
     }
     const pluginProviders = resolvePluginProviders({
       hooks,
@@ -398,6 +399,7 @@ export const ProvidersLoginCommand = effectCmd({
           hint: {
             openchat: "recommended",
             openai: "ChatGPT Plus/Pro or API key",
+            opencode: "recommended",
           }[x.id],
         })),
       ),
@@ -465,6 +467,10 @@ export const ProvidersLoginCommand = effectCmd({
 
     if (provider === "openchat") {
       yield* Prompt.log.info("Create an api key at https://openchat.ai/auth")
+    }
+
+    if (provider === "opencode") {
+      yield* Prompt.log.info("Create an api key at https://opencode.ai/auth")
     }
 
     if (provider === "vercel") {
