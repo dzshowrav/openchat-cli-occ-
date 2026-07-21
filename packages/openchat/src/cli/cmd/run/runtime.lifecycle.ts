@@ -321,7 +321,7 @@ export async function createRuntimeLifecycle(input: LifecycleInput): Promise<Lif
         footer.destroy()
         unregisterKeymap?.()
         shutdown(renderer)
-        process.stdout.write("\n")
+        process.stdout.write("\x1b[2J\x1b[H")
         source.cleanup?.()
       }
     }
