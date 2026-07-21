@@ -6,6 +6,7 @@ import { Global } from "@openchat-ai/core/global"
 import fs from "fs/promises"
 import path from "path"
 import os from "os"
+import readline from "readline"
 import { Filesystem } from "@/util/filesystem"
 import { Process } from "@/util/process"
 
@@ -254,9 +255,8 @@ async function showTerminalCountdown(durationMs: number): Promise<boolean> {
   return new Promise<boolean>((resolve) => {
     let cancelled = false
 
-    const onData = (data: Buffer) => {
-      const chunk = data.toString()
-      if (chunk === "\x03" || chunk === "\x1b" || chunk === "n" || chunk === "N") {
+    const onKeypress = (_chunk: Buffer, key: { name?: string; ctrl?: boolean }) => {
+      if (key.name === "escape" || (key.name === "c" && key.ctrl) || key.name === "n") {
         cancelled = true
         cleanup()
         resolve(false)
@@ -266,15 +266,16 @@ async function showTerminalCountdown(durationMs: number): Promise<boolean> {
     const cleanup = () => {
       clearInterval(id)
       try { stdin.setRawMode(false) } catch {}
-      stdin.off("data", onData)
+      stdin.off("keypress", onKeypress)
+      stdin.pause()
     }
 
-    let hadRaw = false
-    try {
-      stdin.setRawMode(true)
-      hadRaw = true
-    } catch {}
-    if (hadRaw) stdin.on("data", onData)
+    if (stdin.isTTY) {
+      readline.emitKeypressEvents(stdin)
+      stdin.resume()
+      try { stdin.setRawMode(true) } catch {}
+      stdin.on("keypress", onKeypress)
+    }
 
     const id = setInterval(() => {
       const elapsed = Date.now() - start
