@@ -19,6 +19,7 @@ interface UninstallArgs {
 
 interface RemovalTargets {
   directories: Array<{ path: string; label: string; keep: boolean }>
+  files: Array<{ path: string; label: string }>
   shellConfig: string | null
   binary: string | null
 }
@@ -113,7 +114,15 @@ async function collectRemovalTargets(args: UninstallArgs, method: Installation.M
   const shellConfig = method === "curl" ? await getShellConfigFile() : null
   const binary = method === "curl" ? process.execPath : null
 
-  return { directories, shellConfig, binary }
+  const home = os.homedir()
+  const files: RemovalTargets["files"] = []
+  for (const name of ["occ", "occ-install"]) {
+    const p = path.join(home, ".local", "bin", name)
+    const exists = await fs.access(p).then(() => true).catch(() => false)
+    if (exists) files.push({ path: p, label: name })
+  }
+
+  return { directories, files, shellConfig, binary }
 }
 
 async function showRemovalSummary(targets: RemovalTargets, method: Installation.Method) {
@@ -132,6 +141,10 @@ async function showRemovalSummary(targets: RemovalTargets, method: Installation.
     const prefix = dir.keep ? "○" : "✓"
 
     prompts.log.info(`  ${prefix} ${dir.label}: ${shortenPath(dir.path)} ${UI.Style.TEXT_DIM}(${sizeStr})${status}`)
+  }
+
+  for (const file of targets.files) {
+    prompts.log.info(`  ✓ Wrapper: ${shortenPath(file.path)}`)
   }
 
   if (targets.binary) {
@@ -180,6 +193,17 @@ async function executeUninstall(method: Installation.Method, targets: RemovalTar
       continue
     }
     spinner.stop(`Removed ${dir.label}`)
+  }
+
+  for (const file of targets.files) {
+    spinner.start(`Removing ${file.label}...`)
+    const err = await fs.rm(file.path, { force: true }).catch((e) => e)
+    if (err) {
+      spinner.stop(`Failed to remove ${file.label}`, 1)
+      errors.push(`${file.label}: ${err.message}`)
+    } else {
+      spinner.stop(`Removed ${file.label}`)
+    }
   }
 
   if (targets.shellConfig) {
