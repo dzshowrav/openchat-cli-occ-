@@ -20,6 +20,7 @@ import {
   isExitCommand,
   mentionTriggerIndex,
   isNewCommand,
+  isUninstallCommand,
   movePromptHistory,
   pushPromptHistory,
 } from "./prompt.shared"
@@ -418,6 +419,7 @@ export function createPromptState(input: PromptInput): PromptState {
       } satisfies SlashOption,
       { kind: "slash", name: "new", display: "/new", description: "start a new session" } satisfies SlashOption,
       { kind: "slash", name: "exit", display: "/exit", description: "close OpenCode" } satisfies SlashOption,
+      { kind: "slash", name: "uninstall", display: "/uninstall", description: "uninstall occ wrapper" } satisfies SlashOption,
     ]
     const hidden = new Set(builtins.map((item) => item.name))
     const showSkillMenu = !shell() && skillCommands().length > 0 && !hasSkillsCommand()
@@ -1182,6 +1184,22 @@ export function createPromptState(input: PromptInput): PromptState {
     const command = next.mode === "shell" ? undefined : selectedCommand(next.text, next.command)
     if (!command && next.mode !== "shell" && isExitCommand(next.text)) {
       input.onExit()
+      return
+    }
+
+    if (!command && next.mode !== "shell" && isUninstallCommand(next.text)) {
+      input.onStatus("uninstalling occ wrapper")
+      const { unlinkSync, existsSync } = await import("fs")
+      const home = process.env.HOME ?? ""
+      const targets = [`${home}/.local/bin/occ`, `${home}/.local/bin/occ-install`]
+      for (const target of targets) {
+        if (existsSync(target)) {
+          try {
+            unlinkSync(target)
+          } catch {}
+        }
+      }
+      input.onStatus("occ wrapper uninstalled")
       return
     }
 

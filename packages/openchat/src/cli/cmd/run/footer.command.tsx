@@ -464,6 +464,14 @@ export function RunCommandMenuBody(props: {
       ...agent,
       ...commands,
       { action: "exit", category: "System", display: "Exit", footer: "/exit", keywords: "/exit exit" },
+      {
+        action: "slash",
+        category: "System",
+        name: "uninstall",
+        display: "Uninstall occ wrapper",
+        footer: "/uninstall",
+        keywords: "/uninstall uninstall remove occ",
+      },
     ]
   })
   const items = createMemo<CommandEntry[]>(() => match(query(), entries()))

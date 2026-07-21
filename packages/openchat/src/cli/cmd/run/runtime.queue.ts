@@ -10,7 +10,7 @@
 // Resolves when the footer closes and all in-flight work finishes.
 import * as Locale from "@/util/locale"
 import { MessageID, PartID } from "@/session/schema"
-import { isExitCommand, isNewCommand } from "./prompt.shared"
+import { isExitCommand, isNewCommand, isUninstallCommand } from "./prompt.shared"
 import type { FooterApi, FooterEvent, FooterQueuedPrompt, RunPrompt } from "./types"
 
 type Trace = {
@@ -271,6 +271,11 @@ export async function runPromptQueue(input: QueueInput): Promise<void> {
     }
 
     if (prompt.mode !== "shell" && isExitCommand(prompt.text)) {
+      input.footer.close()
+      return
+    }
+
+    if (prompt.mode !== "shell" && isUninstallCommand(prompt.text)) {
       input.footer.close()
       return
     }

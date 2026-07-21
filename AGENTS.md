@@ -165,3 +165,9 @@ const table = sqliteTable("session", {
 The `occ` wrapper (`~/.local/bin/occ`) must use `bun run --cwd "$HOME/opc/packages/openchat"` for correct JSX module resolution (`@opentui/solid/jsx-dev-runtime` etc.). Without `--cwd`, bun fails to find the right `node_modules`.
 
 To let `occ` work from any project directory, the wrapper passes `$PWD` as the `[project]` positional when no arguments are given. This keeps module resolution working while telling the app to use the user's current directory as the project root.
+
+Install/uninstall with `occ-install [install|uninstall]` (lives in `~/.local/bin/occ-install`).
+
+## In-app `/uninstall` slash command
+
+The `/uninstall` slash command (added in `footer.prompt.tsx`, `runtime.queue.ts`, `footer.command.tsx`, `prompt.shared.ts`) removes `~/.local/bin/occ` and `~/.local/bin/occ-install` at runtime. The CLI `openchat uninstall` command is a separate, full package uninstaller — do not confuse the two.
