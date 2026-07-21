@@ -833,6 +833,14 @@ function App(props: { onSnapshot?: () => Promise<string[]>; pluginHost: TuiPlugi
         category: "System",
       },
       {
+        name: "app.uninstall",
+        title: "Uninstall occ wrapper",
+        slashName: "uninstall",
+        slashAliases: ["remove"],
+        run: () => exit(),
+        category: "System",
+      },
+      {
         name: "app.debug",
         title: "Toggle debug panel",
         category: "System",
