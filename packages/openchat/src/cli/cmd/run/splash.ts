@@ -1,13 +1,7 @@
-// Entry and exit splash banners for direct interactive mode scrollback.
+// Entry splash banner for direct interactive mode scrollback.
 //
-// Renders the full openchat entry logo and a compact [O] exit badge, plus
-// session metadata and the resume command. These are scrollback snapshots, so
+// Renders the full openchat entry logo. These are scrollback snapshots, so
 // they become immutable terminal history once committed.
-//
-// Both variants use a cell-based renderer. cells() classifies each character
-// in the source template as text, full-block, half-block-mix, or
-// half-block-top, and draw() renders it with foreground/background shadow
-// colors from the theme.
 import {
   BoxRenderable,
   type ColorInput,
@@ -171,7 +165,7 @@ function draw(
   }
 }
 
-function build(input: SplashWriterInput, kind: "entry" | "exit", ctx: ScrollbackRenderContext): ScrollbackSnapshot {
+function build(input: SplashWriterInput, _kind: "entry", ctx: ScrollbackRenderContext): ScrollbackSnapshot {
   const width = Math.max(1, ctx.width)
   const meta = splashMeta(input)
   const lines: Array<{ left: number; top: number; text: string; fg: ColorInput; bg?: ColorInput; attrs?: number }> = []
@@ -208,40 +202,6 @@ function build(input: SplashWriterInput, kind: "entry" | "exit", ctx: Scrollback
     height = top + mark.length
   }
 
-  if (kind === "exit") {
-    const mark = go.right.slice(1)
-    const top = 1
-    const body_left = (mark[0]?.length ?? 0) + 2
-    const session = "Session  "
-    const label = "Continue "
-
-    for (let i = 0; i < mark.length; i += 1) {
-      draw(lines, mark[i] ?? "", {
-        left: 0,
-        top: top + i,
-        fg: left,
-        shadow: leftShadow,
-      })
-    }
-
-    if (input.showSession !== false) {
-      push(lines, body_left, top, session, left, undefined, TextAttributes.DIM)
-      push(lines, body_left + session.length, top, meta.title, right, undefined, TextAttributes.BOLD)
-    }
-
-    push(lines, body_left, top + 1, label, left, undefined, TextAttributes.DIM)
-    push(
-      lines,
-      body_left + label.length,
-      top + 1,
-      `openchat --mini -s ${meta.session_id}`,
-      right,
-      undefined,
-      TextAttributes.BOLD,
-    )
-    height = top + mark.length
-  }
-
   const root = new BoxRenderable(ctx.renderContext, {
     position: "absolute",
     left: 0,
@@ -273,8 +233,4 @@ export function splashMeta(input: SplashInput): SplashMeta {
 
 export function entrySplash(input: SplashWriterInput): ScrollbackWriter {
   return (ctx) => build(input, "entry", ctx)
-}
-
-export function exitSplash(input: SplashWriterInput): ScrollbackWriter {
-  return (ctx) => build(input, "exit", ctx)
 }

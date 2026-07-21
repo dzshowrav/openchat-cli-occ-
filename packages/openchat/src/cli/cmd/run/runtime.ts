@@ -722,7 +722,6 @@ async function runInteractiveRuntime(input: RunRuntimeInput, deps: RunRuntimeDep
     const title = await resolveExitTitle(ctx, input, state)
 
     await shell.close({
-      showExit: state.shown && hasSession(input, state),
       sessionTitle: title,
       sessionID: state.sessionID,
       history: state.history,

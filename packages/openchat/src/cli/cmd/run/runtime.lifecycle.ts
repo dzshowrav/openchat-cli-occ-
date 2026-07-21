@@ -2,8 +2,8 @@
 //
 // Creates the OpenTUI CliRenderer in split-footer mode, resolves the theme
 // from the terminal palette, writes the entry splash to scrollback, and
-// constructs the RunFooter. Returns a Lifecycle handle whose close() writes
-// the exit splash and tears everything down in the right order:
+// constructs the RunFooter. Returns a Lifecycle handle whose close() tears
+// everything down in the right order:
 // footer.close → footer.destroy → renderer shutdown.
 //
 // Also wires SIGINT so Ctrl-c clears a live prompt draft first, then falls
@@ -17,7 +17,7 @@ import { registerOpenchatKeymap } from "@openchat-ai/tui/keymap"
 import { Session as SessionApi } from "@/session/session"
 import * as Locale from "@/util/locale"
 import { resolveInteractiveStdin } from "./runtime.stdin"
-import { entrySplash, exitSplash, splashMeta } from "./splash"
+import { entrySplash, splashMeta } from "./splash"
 import { resolveRunTheme } from "./theme"
 import type {
   FooterApi,
@@ -303,7 +303,6 @@ export async function createRuntimeLifecycle(input: LifecycleInput): Promise<Lif
     attachSigint()
 
     const close = async (next: {
-      showExit: boolean
       sessionTitle?: string
       sessionID?: string
       history?: RunPrompt[]
@@ -314,38 +313,15 @@ export async function createRuntimeLifecycle(input: LifecycleInput): Promise<Lif
 
       closed = true
       detachSigint()
-      let wroteExit = false
-
       try {
         await footer.idle().catch(() => {})
-
-        const show = renderer.isDestroyed ? false : next.showExit
-        if (!renderer.isDestroyed && show) {
-          const sessionID = next.sessionID || input.getSessionID?.() || input.sessionID
-          const splash = splashInfo(next.sessionTitle ?? input.sessionTitle, next.history ?? input.history)
-          wroteExit = queueSplash(
-            renderer,
-            state,
-            "exit",
-            exitSplash({
-              ...splashMeta({
-                title: splash.title,
-                session_id: sessionID,
-              }),
-              theme: footer.currentTheme().splash,
-            }),
-          )
-          await renderer.idle().catch(() => {})
-        }
       } finally {
         footer.close()
         await footer.idle().catch(() => {})
         footer.destroy()
         unregisterKeymap?.()
         shutdown(renderer)
-        if (!wroteExit) {
-          process.stdout.write("\n")
-        }
+        process.stdout.write("\n")
         source.cleanup?.()
       }
     }
