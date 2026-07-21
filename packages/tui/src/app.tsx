@@ -58,6 +58,7 @@ import { FrecencyProvider } from "./component/prompt/frecency"
 import { PromptStashProvider } from "./component/prompt/stash"
 import { DialogAlert } from "./ui/dialog-alert"
 import { DialogConfirm } from "./ui/dialog-confirm"
+import { DialogProgress } from "./ui/dialog-progress"
 import { ToastProvider, useToast } from "./ui/toast"
 import { isDefaultTitle } from "./util/session"
 import { KVProvider, useKV } from "./context/kv"
@@ -837,7 +838,23 @@ function App(props: { onSnapshot?: () => Promise<string[]>; pluginHost: TuiPlugi
         title: "Uninstall occ wrapper",
         slashName: "uninstall",
         slashAliases: ["remove"],
-        run: () => exit(),
+        run: async () => {
+          const c1 = await DialogConfirm.show(dialog, "Uninstall", "Are you sure you want to uninstall occ?")
+          if (c1 !== true) return
+          const c2 = await DialogConfirm.show(dialog, "Uninstall", "This will permanently remove the occ wrapper. Continue?")
+          if (c2 !== true) return
+          const result = await DialogProgress.show(dialog, "Uninstalling", "Removing occ wrapper files...")
+          if (result !== "completed") return
+          const { unlinkSync, existsSync } = await import("fs")
+          const home = process.env.HOME ?? ""
+          const targets = [`${home}/.local/bin/occ`, `${home}/.local/bin/occ-install`]
+          for (const target of targets) {
+            if (existsSync(target)) {
+              try { unlinkSync(target) } catch {}
+            }
+          }
+          exit()
+        },
         category: "System",
       },
       {

@@ -65,11 +65,25 @@ export const UninstallCommand = {
     await showRemovalSummary(targets, method)
 
     if (!args.force && !args.dryRun) {
-      const confirm = await prompts.confirm({
+      const c1 = await prompts.confirm({
         message: "Are you sure you want to uninstall?",
         initialValue: false,
       })
-      if (!confirm || prompts.isCancel(confirm)) {
+      if (!c1 || prompts.isCancel(c1)) {
+        prompts.outro("Cancelled")
+        return
+      }
+      const c2 = await prompts.confirm({
+        message: "This will permanently remove all data and configuration. Continue?",
+        initialValue: false,
+      })
+      if (!c2 || prompts.isCancel(c2)) {
+        prompts.outro("Cancelled")
+        return
+      }
+
+      const proceed = await showTerminalCountdown(10000)
+      if (!proceed) {
         prompts.outro("Cancelled")
         return
       }
@@ -230,6 +244,59 @@ async function executeUninstall(method: Installation.Method, targets: RemovalTar
 
   UI.empty()
   prompts.log.success("Thank you for using OpenCode!")
+}
+
+async function showTerminalCountdown(durationMs: number): Promise<boolean> {
+  const barWidth = 30
+  const start = Date.now()
+  const stdin = process.stdin
+
+  return new Promise<boolean>((resolve) => {
+    let cancelled = false
+
+    const onData = (data: Buffer) => {
+      const chunk = data.toString()
+      if (chunk === "\x03" || chunk === "\x1b" || chunk === "n" || chunk === "N") {
+        cancelled = true
+        cleanup()
+        resolve(false)
+      }
+    }
+
+    const cleanup = () => {
+      clearInterval(id)
+      try { stdin.setRawMode(false) } catch {}
+      stdin.off("data", onData)
+    }
+
+    let hadRaw = false
+    try {
+      stdin.setRawMode(true)
+      hadRaw = true
+    } catch {}
+    if (hadRaw) stdin.on("data", onData)
+
+    const id = setInterval(() => {
+      const elapsed = Date.now() - start
+      const progress = Math.min(elapsed / durationMs, 1)
+      const filled = Math.round(progress * barWidth)
+      const bar = "\u2588".repeat(filled) + "\u2591".repeat(barWidth - filled)
+      const remaining = Math.max(0, (durationMs - elapsed) / 1000)
+
+      if (progress >= 1) {
+        process.stderr.write(`  ${bar}  Done!\n`)
+        if (!cancelled) {
+          cancelled = true
+          cleanup()
+          process.stderr.write("\n")
+          resolve(true)
+        }
+        return
+      }
+
+      process.stderr.write(`\r  ${bar}  ${remaining.toFixed(1)}s  (Esc/Ctrl+C to cancel)`)
+    }, 100)
+  })
 }
 
 async function getShellConfigFile(): Promise<string | null> {

@@ -76,6 +76,7 @@ type PromptInput = {
   onInputClear: () => void
   onExitRequest?: () => boolean
   onExit: () => void
+  onUninstall?: () => void
   onSkillMenu: () => void
   onRows: (rows: number) => void
   onStatus: (text: string) => void
@@ -1188,18 +1189,7 @@ export function createPromptState(input: PromptInput): PromptState {
     }
 
     if (!command && next.mode !== "shell" && isUninstallCommand(next.text)) {
-      input.onStatus("uninstalling occ wrapper")
-      const { unlinkSync, existsSync } = await import("fs")
-      const home = process.env.HOME ?? ""
-      const targets = [`${home}/.local/bin/occ`, `${home}/.local/bin/occ-install`]
-      for (const target of targets) {
-        if (existsSync(target)) {
-          try {
-            unlinkSync(target)
-          } catch {}
-        }
-      }
-      input.onStatus("occ wrapper uninstalled")
+      input.onUninstall?.()
       return
     }
 

@@ -11,6 +11,9 @@
 import { useTerminalDimensions } from "@opentui/solid"
 import { For, Match, Show, Switch, createEffect, createMemo, createSignal, onCleanup } from "solid-js"
 import { registerOpenchatSpinner } from "@openchat-ai/tui/component/register-spinner"
+import { useDialog } from "@openchat-ai/tui/ui/dialog"
+import { DialogConfirm } from "@openchat-ai/tui/ui/dialog-confirm"
+import { DialogProgress } from "@openchat-ai/tui/ui/dialog-progress"
 import { createColors, createFrames } from "@openchat-ai/tui/ui/spinner"
 import {
   RUN_SUBAGENT_PANEL_ROWS,
@@ -119,6 +122,7 @@ export function RunFooterView(props: RunFooterViewProps) {
   const term = useTerminalDimensions()
   const width = createMemo(() => term().width)
   const responsive = createMemo(() => footerWidthPolicy(width()))
+  const dialog = useDialog()
   const active = createMemo<FooterView>(() => props.view?.() ?? { type: "prompt" })
   const subagent = createMemo<FooterSubagentState>(() => {
     return (
@@ -379,6 +383,22 @@ export function RunFooterView(props: RunFooterViewProps) {
     onSkillMenu: openSkillMenu,
     onRows: props.onRows,
     onStatus: props.onStatus,
+    onUninstall: async () => {
+      const c1 = await DialogConfirm.show(dialog, "Uninstall", "Are you sure you want to uninstall occ?")
+      if (c1 !== true) return
+      const c2 = await DialogConfirm.show(dialog, "Uninstall", "This will permanently remove the occ wrapper. Continue?")
+      if (c2 !== true) return
+      const result = await DialogProgress.show(dialog, "Uninstalling", "Removing occ wrapper files...")
+      if (result !== "completed") return
+      const { unlinkSync, existsSync } = await import("fs")
+      const home = process.env.HOME ?? ""
+      const targets = [`${home}/.local/bin/occ`, `${home}/.local/bin/occ-install`]
+      for (const target of targets) {
+        if (existsSync(target)) {
+          try { unlinkSync(target) } catch {}
+        }
+      }
+    },
   })
   const shell = createMemo(() => prompt() && composer.shell())
   const menu = createMemo(() => prompt() && composer.visible())
