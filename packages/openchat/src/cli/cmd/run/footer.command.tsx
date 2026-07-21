@@ -468,8 +468,8 @@ export function RunCommandMenuBody(props: {
         action: "slash",
         category: "System",
         name: "uninstall",
-        display: "Uninstall occ wrapper",
-        footer: "/uninstall",
+        display: "/uninstall",
+        footer: "uninstall occ wrapper",
         keywords: "/uninstall uninstall remove occ",
       },
     ]
