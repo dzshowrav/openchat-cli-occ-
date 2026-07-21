@@ -83,29 +83,36 @@ The script works on a **completely fresh Termux** and handles everything automat
 
 After installation, **restart Termux** or run `source ~/.bashrc` (or `source ~/.zshenv` for zsh).
 
-### Manual Installation
+### Manual Installation [ highly recommend ]
 
-If you prefer to install step by step:
+If quick installation not work then try to install step by step:
 
 ```bash
-# 1. Install system dependencies
-pkg update
+#1. First work.
+pkg updated -y && pkg upgrade -y
+
+#2. Install system dependencies
 pkg install -y git curl ca-certificates binutils termux-exec nodejs
 
-# 2. Add Termux Bun repository and install Bun
-echo "deb https://termuxvoid.github.io/repo termuxvoid main" >> $PREFIX/etc/apt/sources.list
+# 3. Add Termux Bun repository 
+curl -sL https://github.com/termuxvoid/repo/raw/main/install.sh | bash
+
+#4. install Bun
 pkg update
+
+pkg upgrade 
+
 pkg install -y bun
 
-# 3. Clone the repository
+#5. Clone the open-chat-cli app repository
 git clone https://github.com/dzshowrav/openchat-cli-occ- ~/opc
 
-# 4. Install JavaScript dependencies
+#6. Install JavaScript dependencies by bun
 cd ~/opc
 export LD_PRELOAD=/data/data/com.termux/files/usr/lib/libtermux-exec-ld-preload.so
 bun install
 
-# 5. Create the occ wrapper
+# 7. Create the occ wrapper
 mkdir -p ~/.local/bin
 cat > ~/.local/bin/occ << 'EOF'
 #!/data/data/com.termux/files/usr/bin/bash
@@ -118,11 +125,12 @@ fi
 EOF
 chmod +x ~/.local/bin/occ
 
-# 6. Add to PATH
+
+#8. Add to PATH
 echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.bashrc
 source ~/.bashrc
 
-# 7. Verify
+#9. Verify
 occ --version
 ```
 
